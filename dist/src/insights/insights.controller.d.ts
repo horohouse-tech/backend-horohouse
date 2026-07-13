@@ -4,7 +4,7 @@ export declare class InsightsController {
     private readonly insightsService;
     constructor(insightsService: InsightsService);
     findAll(query: QueryPostsDto): Promise<{
-        data: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -16,18 +16,18 @@ export declare class InsightsController {
             totalPages: number;
         };
     }>;
-    featured(limit?: number): Promise<(import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    featured(limit?: number): Promise<(import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
-    trending(limit?: number): Promise<(import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    trending(limit?: number): Promise<(import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
     search(q: string, query: QueryPostsDto): Promise<{
-        data: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -39,18 +39,18 @@ export declare class InsightsController {
             totalPages: number;
         };
     }>;
-    getCategories(): Promise<(import("./schemas/category.schema").Category & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    getCategories(): Promise<(import("mongoose").FlattenMaps<import("./schemas/category.schema").CategoryDocument> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
-    popularTags(limit?: number): Promise<(import("./schemas/tag.schema").Tag & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    popularTags(limit?: number): Promise<(import("mongoose").FlattenMaps<import("./schemas/tag.schema").TagDocument> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
     marketInsights(query: QueryPostsDto): Promise<{
-        data: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -63,7 +63,7 @@ export declare class InsightsController {
         };
     }>;
     byCategory(slug: string, query: QueryPostsDto): Promise<{
-        data: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -76,7 +76,7 @@ export declare class InsightsController {
         };
     }>;
     byTag(slug: string, query: QueryPostsDto): Promise<{
-        data: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -89,7 +89,7 @@ export declare class InsightsController {
         };
     }>;
     authorPage(slug: string, query: QueryPostsDto): Promise<{
-        data: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -100,7 +100,7 @@ export declare class InsightsController {
             limit: number;
             totalPages: number;
         };
-        author: import("./schemas/author-profile.schema").AuthorProfile & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        author: import("mongoose").FlattenMaps<import("./schemas/author-profile.schema").AuthorProfileDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -108,27 +108,25 @@ export declare class InsightsController {
     }>;
     neighborhoodGuide(slug: string): Promise<{
         city: string;
-        posts: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        posts: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
         })[];
     }>;
-    findOne(slug: string): Promise<import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    findOne(slug: string): Promise<import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     }>;
     related(slug: string, limit?: number): Promise<any[]>;
-    submitDraft(dto: any, req: any): Promise<import("mongoose").Document<unknown, {}, import("./schemas/post.schema").PostDocument, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    submitDraft(dto: any, req: any): Promise<import("mongoose").Document<unknown, {}, import("./schemas/post.schema").PostDocument, {}, {}> & import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
     mySubmissions(query: QueryPostsDto, req: any): Promise<{
-        data: (import("./schemas/post.schema").Post & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/post.schema").PostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;

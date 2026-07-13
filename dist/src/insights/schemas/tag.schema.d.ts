@@ -7,58 +7,12 @@ export declare class Tag {
     usageCount: number;
     isActive: boolean;
 }
-export declare const TagSchema: import("mongoose").Schema<Tag, import("mongoose").Model<Tag, any, any, any, any, any, Tag>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Tag, Document<unknown, {}, Tag, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<Tag & {
+export declare const TagSchema: import("mongoose").Schema<Tag, import("mongoose").Model<Tag, any, any, any, Document<unknown, any, Tag, any, {}> & Tag & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    name?: import("mongoose").SchemaDefinitionProperty<string, Tag, Document<unknown, {}, Tag, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Tag & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    slug?: import("mongoose").SchemaDefinitionProperty<string, Tag, Document<unknown, {}, Tag, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Tag & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    description?: import("mongoose").SchemaDefinitionProperty<string, Tag, Document<unknown, {}, Tag, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Tag & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    usageCount?: import("mongoose").SchemaDefinitionProperty<number, Tag, Document<unknown, {}, Tag, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Tag & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, Tag, Document<unknown, {}, Tag, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Tag & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, Tag>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Tag, Document<unknown, {}, import("mongoose").FlatRecord<Tag>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<Tag> & {
+    _id: Types.ObjectId;
+} & {
+    __v: number;
+}>;

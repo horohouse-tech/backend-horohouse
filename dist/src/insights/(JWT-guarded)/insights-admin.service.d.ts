@@ -13,7 +13,7 @@ export declare class InsightsAdminService {
     private seoService;
     constructor(postModel: Model<PostDocument>, categoryModel: Model<CategoryDocument>, tagModel: Model<TagDocument>, authorModel: Model<AuthorProfileDocument>, seoService: InsightsSeoService);
     findAll(query: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -33,63 +33,51 @@ export declare class InsightsAdminService {
         scheduled: number;
         featured: number;
         trending: number;
-        topPosts: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        topPosts: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
         })[];
-        recentActivity: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        recentActivity: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
         })[];
     }>;
-    findById(id: string): Promise<Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    findById(id: string): Promise<import("mongoose").FlattenMaps<PostDocument> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     }>;
-    create(dto: CreatePostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, import("mongoose").DefaultSchemaOptions> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    create(dto: CreatePostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, {}> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
-    update(id: string, dto: UpdatePostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, import("mongoose").DefaultSchemaOptions> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    update(id: string, dto: UpdatePostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, {}> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
-    publish(id: string, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, import("mongoose").DefaultSchemaOptions> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    publish(id: string, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, {}> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
-    schedule(id: string, dto: SchedulePostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, import("mongoose").DefaultSchemaOptions> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    schedule(id: string, dto: SchedulePostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, {}> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
-    toggleFeatured(id: string, isFeatured: boolean, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, import("mongoose").DefaultSchemaOptions> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    toggleFeatured(id: string, isFeatured: boolean, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, {}> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
-    reviewSubmission(id: string, dto: ReviewPostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, import("mongoose").DefaultSchemaOptions> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    reviewSubmission(id: string, dto: ReviewPostDto, editorUserId: string): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, {}> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
     delete(id: string, editorUserId: string): Promise<{
         message: string;
@@ -105,42 +93,38 @@ export declare class InsightsAdminService {
         height: any;
     }>;
     getAnalytics(params: any): Promise<{
-        topByViews: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        topByViews: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
         })[];
-        recentPublished: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        recentPublished: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
         })[];
         viewsByCategory: any[];
     }>;
-    createCategory(dto: CreateCategoryDto): Promise<import("mongoose").Document<unknown, {}, CategoryDocument, {}, import("mongoose").DefaultSchemaOptions> & Category & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    createCategory(dto: CreateCategoryDto): Promise<import("mongoose").Document<unknown, {}, CategoryDocument, {}, {}> & Category & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
-    updateCategory(id: string, dto: Partial<CreateCategoryDto>): Promise<import("mongoose").Document<unknown, {}, CategoryDocument, {}, import("mongoose").DefaultSchemaOptions> & Category & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    updateCategory(id: string, dto: Partial<CreateCategoryDto>): Promise<import("mongoose").Document<unknown, {}, CategoryDocument, {}, {}> & Category & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
     deleteCategory(id: string): Promise<{
         message: string;
     }>;
-    getAllCategories(): Promise<(Category & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    getAllCategories(): Promise<(import("mongoose").FlattenMaps<CategoryDocument> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
     getAllTags(params: any): Promise<{
-        data: (Tag & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<TagDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -151,18 +135,16 @@ export declare class InsightsAdminService {
             limit: any;
         };
     }>;
-    createTag(name: string): Promise<import("mongoose").Document<unknown, {}, TagDocument, {}, import("mongoose").DefaultSchemaOptions> & Tag & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    createTag(name: string): Promise<import("mongoose").Document<unknown, {}, TagDocument, {}, {}> & Tag & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
     deleteTag(id: string): Promise<{
         message: string;
     }>;
     getAuthors(params: any): Promise<{
-        data: (AuthorProfile & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<AuthorProfileDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -173,18 +155,14 @@ export declare class InsightsAdminService {
             limit: any;
         };
     }>;
-    createAuthorProfile(dto: CreateAuthorProfileDto): Promise<import("mongoose").Document<unknown, {}, AuthorProfileDocument, {}, import("mongoose").DefaultSchemaOptions> & AuthorProfile & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    createAuthorProfile(dto: CreateAuthorProfileDto): Promise<import("mongoose").Document<unknown, {}, AuthorProfileDocument, {}, {}> & AuthorProfile & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
-    updateAuthorProfile(id: string, dto: Partial<CreateAuthorProfileDto>): Promise<import("mongoose").Document<unknown, {}, AuthorProfileDocument, {}, import("mongoose").DefaultSchemaOptions> & AuthorProfile & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    updateAuthorProfile(id: string, dto: Partial<CreateAuthorProfileDto>): Promise<import("mongoose").Document<unknown, {}, AuthorProfileDocument, {}, {}> & AuthorProfile & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
 }

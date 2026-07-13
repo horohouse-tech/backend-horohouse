@@ -4,31 +4,12 @@ export declare class Newsletter {
     email: string;
     isActive: boolean;
 }
-export declare const NewsletterSchema: import("mongoose").Schema<Newsletter, import("mongoose").Model<Newsletter, any, any, any, any, any, Newsletter>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Newsletter, Document<unknown, {}, Newsletter, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<Newsletter & {
+export declare const NewsletterSchema: import("mongoose").Schema<Newsletter, import("mongoose").Model<Newsletter, any, any, any, Document<unknown, any, Newsletter, any, {}> & Newsletter & {
     _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    email?: import("mongoose").SchemaDefinitionProperty<string, Newsletter, Document<unknown, {}, Newsletter, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Newsletter & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, Newsletter, Document<unknown, {}, Newsletter, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Newsletter & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, Newsletter>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Newsletter, Document<unknown, {}, import("mongoose").FlatRecord<Newsletter>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<Newsletter> & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}>;

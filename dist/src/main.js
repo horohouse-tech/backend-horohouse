@@ -34,6 +34,9 @@ const ALLOWED_ORIGINS = [
     'http://192.168.254.37:8081',
     'http://192.168.254.37:8082',
     'http://192.168.254.37:4000',
+    'http://192.168.96.37:8081',
+    'http://192.168.96.37:8082',
+    'http://192.168.96.37:4000',
 ];
 const CORS_OPTIONS = {
     origin: ALLOWED_ORIGINS,

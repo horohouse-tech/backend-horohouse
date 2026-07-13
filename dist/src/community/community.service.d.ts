@@ -1,6 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { CommunityPost, CommunityPostDocument, PostCategory } from './schemas/community-post.schema';
-import { User, UserDocument } from '../users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 export declare class CommunityService {
@@ -21,7 +21,7 @@ export declare class CommunityService {
         sortBy: string;
         sortOrder: 'asc' | 'desc';
     }): Promise<{
-        data: (CommunityPost & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<CommunityPostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -39,7 +39,7 @@ export declare class CommunityService {
         page: number;
         limit: number;
     }): Promise<{
-        data: (CommunityPost & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<CommunityPostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -56,7 +56,7 @@ export declare class CommunityService {
         limit: number;
         sortOrder: 'asc' | 'desc';
     }): Promise<{
-        data: (CommunityPost & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<CommunityPostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -69,7 +69,7 @@ export declare class CommunityService {
         };
     }>;
     getAuthorProfile(userId: string): Promise<{
-        user: User & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        user: import("mongoose").FlattenMaps<UserDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -100,12 +100,10 @@ export declare class CommunityService {
         page?: number;
         limit?: number;
     }): Promise<{
-        data: (import("mongoose").Document<unknown, {}, CommunityPostDocument, {}, import("mongoose").DefaultSchemaOptions> & CommunityPost & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").Document<unknown, {}, CommunityPostDocument, {}, {}> & CommunityPost & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
-        } & {
-            id: string;
         })[];
         meta: {
             total: number;

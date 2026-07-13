@@ -10,85 +10,12 @@ export declare class Comparison {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const ComparisonSchema: import("mongoose").Schema<Comparison, import("mongoose").Model<Comparison, any, any, any, any, any, Comparison>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Comparison, Document<unknown, {}, Comparison, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
+export declare const ComparisonSchema: import("mongoose").Schema<Comparison, import("mongoose").Model<Comparison, any, any, any, Document<unknown, any, Comparison, any, {}> & Comparison & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    name?: import("mongoose").SchemaDefinitionProperty<string, Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    propertyIds?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId[], Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    isPublic?: import("mongoose").SchemaDefinitionProperty<boolean, Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    shareToken?: import("mongoose").SchemaDefinitionProperty<string | undefined, Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    viewsCount?: import("mongoose").SchemaDefinitionProperty<number, Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    createdAt?: import("mongoose").SchemaDefinitionProperty<Date, Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    updatedAt?: import("mongoose").SchemaDefinitionProperty<Date, Comparison, Document<unknown, {}, Comparison, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Comparison & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, Comparison>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Comparison, Document<unknown, {}, import("mongoose").FlatRecord<Comparison>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<Comparison> & {
+    _id: Types.ObjectId;
+} & {
+    __v: number;
+}>;

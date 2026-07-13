@@ -120,7 +120,7 @@ export declare class PropertiesService implements OnModuleInit {
         longitude: number;
     } | null>;
     searchByText(searchText: string, filters?: PropertySearchFilters, options?: PropertySearchOptions, user?: User): Promise<{
-        properties: (Property & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        properties: (import("mongoose").FlattenMaps<PropertyDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;

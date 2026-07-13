@@ -13,112 +13,12 @@ export declare class Category {
     isActive: boolean;
     sortOrder: number;
 }
-export declare const CategorySchema: import("mongoose").Schema<Category, import("mongoose").Model<Category, any, any, any, any, any, Category>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Category, Document<unknown, {}, Category, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
+export declare const CategorySchema: import("mongoose").Schema<Category, import("mongoose").Model<Category, any, any, any, Document<unknown, any, Category, any, {}> & Category & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    name?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    slug?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    description?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    icon?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    coverImage?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    accentColor?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    metaTitle?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    metaDescription?: import("mongoose").SchemaDefinitionProperty<string, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    postCount?: import("mongoose").SchemaDefinitionProperty<number, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    sortOrder?: import("mongoose").SchemaDefinitionProperty<number, Category, Document<unknown, {}, Category, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Category & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, Category>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Category, Document<unknown, {}, import("mongoose").FlatRecord<Category>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<Category> & {
+    _id: Types.ObjectId;
+} & {
+    __v: number;
+}>;

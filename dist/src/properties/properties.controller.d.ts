@@ -23,7 +23,7 @@ export declare class PropertiesController {
     searchByText(query: any, req: FastifyRequest & {
         user?: User;
     }): Promise<{
-        properties: (import("./schemas/property.schema").Property & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        properties: (import("mongoose").FlattenMaps<import("./schemas/property.schema").PropertyDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;

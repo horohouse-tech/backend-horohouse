@@ -60,7 +60,7 @@ export class ChatController {
     async getConversations(
         @Request() req,
         @Query() query: GetConversationsQueryDto,
-    ) {
+    ): Promise<any> {
         return this.chatService.getConversations(req.user.userId, query);
     }
 

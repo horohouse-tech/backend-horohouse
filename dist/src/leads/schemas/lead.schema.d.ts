@@ -22,43 +22,15 @@ export declare class LeadNote {
     content: string;
     createdAt: Date;
 }
-export declare const LeadNoteSchema: import("mongoose").Schema<LeadNote, import("mongoose").Model<LeadNote, any, any, any, any, any, LeadNote>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, LeadNote, Document<unknown, {}, LeadNote, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<LeadNote & Required<{
+export declare const LeadNoteSchema: import("mongoose").Schema<LeadNote, import("mongoose").Model<LeadNote, any, any, any, Document<unknown, any, LeadNote, any, {}> & LeadNote & Required<{
     _id: Types.ObjectId;
 }> & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    _id?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, LeadNote, Document<unknown, {}, LeadNote, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<LeadNote & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    content?: import("mongoose").SchemaDefinitionProperty<string, LeadNote, Document<unknown, {}, LeadNote, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<LeadNote & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    createdAt?: import("mongoose").SchemaDefinitionProperty<Date, LeadNote, Document<unknown, {}, LeadNote, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<LeadNote & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, LeadNote>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, LeadNote, Document<unknown, {}, import("mongoose").FlatRecord<LeadNote>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<LeadNote> & Required<{
+    _id: Types.ObjectId;
+}> & {
+    __v: number;
+}>;
 export declare class Lead {
     name: string;
     email?: string;
@@ -75,139 +47,12 @@ export declare class Lead {
     tags: string[];
     notes: LeadNote[];
 }
-export declare const LeadSchema: import("mongoose").Schema<Lead, import("mongoose").Model<Lead, any, any, any, any, any, Lead>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Lead, Document<unknown, {}, Lead, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
+export declare const LeadSchema: import("mongoose").Schema<Lead, import("mongoose").Model<Lead, any, any, any, Document<unknown, any, Lead, any, {}> & Lead & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    name?: import("mongoose").SchemaDefinitionProperty<string, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    email?: import("mongoose").SchemaDefinitionProperty<string | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    phone?: import("mongoose").SchemaDefinitionProperty<string | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    interest?: import("mongoose").SchemaDefinitionProperty<string | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    source?: import("mongoose").SchemaDefinitionProperty<LeadSource, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    status?: import("mongoose").SchemaDefinitionProperty<LeadStatus, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    location?: import("mongoose").SchemaDefinitionProperty<string | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    lastContactedAt?: import("mongoose").SchemaDefinitionProperty<Date | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    budget?: import("mongoose").SchemaDefinitionProperty<number | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    propertyType?: import("mongoose").SchemaDefinitionProperty<string | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    priority?: import("mongoose").SchemaDefinitionProperty<LeadPriority | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    assignedAgent?: import("mongoose").SchemaDefinitionProperty<string | undefined, Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    tags?: import("mongoose").SchemaDefinitionProperty<string[], Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    notes?: import("mongoose").SchemaDefinitionProperty<LeadNote[], Lead, Document<unknown, {}, Lead, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Lead & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, Lead>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Lead, Document<unknown, {}, import("mongoose").FlatRecord<Lead>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<Lead> & {
+    _id: Types.ObjectId;
+} & {
+    __v: number;
+}>;

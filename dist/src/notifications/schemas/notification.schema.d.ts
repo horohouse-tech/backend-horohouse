@@ -44,108 +44,12 @@ export declare class Notification {
     createdAt?: Date;
     updatedAt?: Date;
 }
-export declare const NotificationSchema: import("mongoose").Schema<Notification, import("mongoose").Model<Notification, any, any, any, any, any, Notification>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Notification, Document<unknown, {}, Notification, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
+export declare const NotificationSchema: import("mongoose").Schema<Notification, import("mongoose").Model<Notification, any, any, any, Document<unknown, any, Notification, any, {}> & Notification & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    type?: import("mongoose").SchemaDefinitionProperty<NotificationType, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    title?: import("mongoose").SchemaDefinitionProperty<string, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    message?: import("mongoose").SchemaDefinitionProperty<string, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    read?: import("mongoose").SchemaDefinitionProperty<boolean, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    link?: import("mongoose").SchemaDefinitionProperty<string | undefined, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    metadata?: import("mongoose").SchemaDefinitionProperty<{
-        [key: string]: any;
-        propertyId?: string;
-        inquiryId?: string;
-        senderId?: string;
-        bookingId?: string;
-        reviewId?: string;
-        checkIn?: string;
-        checkOut?: string;
-        guestName?: string;
-        hostName?: string;
-        propertyTitle?: string;
-        amount?: number;
-        currency?: string;
-    } | undefined, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    createdAt?: import("mongoose").SchemaDefinitionProperty<Date | undefined, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    updatedAt?: import("mongoose").SchemaDefinitionProperty<Date | undefined, Notification, Document<unknown, {}, Notification, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Notification & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, Notification>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Notification, Document<unknown, {}, import("mongoose").FlatRecord<Notification>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<Notification> & {
+    _id: Types.ObjectId;
+} & {
+    __v: number;
+}>;

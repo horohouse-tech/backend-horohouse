@@ -24,104 +24,13 @@ export declare class SystemSettings {
     featureFlags: FeatureFlags;
     version: string;
 }
-export declare const SystemSettingsSchema: import("mongoose").Schema<SystemSettings, import("mongoose").Model<SystemSettings, any, any, any, any, any, SystemSettings>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, SystemSettings, Document<unknown, {}, SystemSettings, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
+export declare const SystemSettingsSchema: import("mongoose").Schema<SystemSettings, import("mongoose").Model<SystemSettings, any, any, any, Document<unknown, any, SystemSettings, any, {}> & SystemSettings & {
     _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    siteName?: import("mongoose").SchemaDefinitionProperty<string, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    siteDescription?: import("mongoose").SchemaDefinitionProperty<string, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    supportEmail?: import("mongoose").SchemaDefinitionProperty<string, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    supportPhone?: import("mongoose").SchemaDefinitionProperty<string, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    socialLinks?: import("mongoose").SchemaDefinitionProperty<SocialLinks, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    maintenanceMode?: import("mongoose").SchemaDefinitionProperty<boolean, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    maintenanceMessage?: import("mongoose").SchemaDefinitionProperty<string, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    allowRegistration?: import("mongoose").SchemaDefinitionProperty<boolean, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    featureFlags?: import("mongoose").SchemaDefinitionProperty<FeatureFlags, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    version?: import("mongoose").SchemaDefinitionProperty<string, SystemSettings, Document<unknown, {}, SystemSettings, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SystemSettings & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, SystemSettings>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, SystemSettings, Document<unknown, {}, import("mongoose").FlatRecord<SystemSettings>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<SystemSettings> & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}>;
 export {};

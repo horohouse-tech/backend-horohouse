@@ -7,41 +7,7 @@ export declare class ChatController {
     private readonly callService;
     constructor(chatService: ChatService, callService: CallService);
     createConversation(req: any, dto: CreateConversationDto): Promise<import("./schemas/conversation.schema").Conversation>;
-    getConversations(req: any, query: GetConversationsQueryDto): Promise<{
-        conversations: {
-            unreadCount: number;
-            otherUser: import("mongoose").Types.ObjectId | undefined;
-            _id: import("mongoose").Types.ObjectId;
-            participants: import("./schemas/conversation.schema").ParticipantInfo[];
-            propertyId?: import("mongoose").Types.ObjectId;
-            lastMessage?: import("./schemas/conversation.schema").LastMessage;
-            messagesCount: number;
-            typingUsers: Map<string, boolean>;
-            onlineStatus: Map<string, string>;
-            isArchived: boolean;
-            archivedAt?: Date;
-            archivedBy: import("mongoose").Types.ObjectId[];
-            isBlocked: boolean;
-            blockedBy?: import("mongoose").Types.ObjectId;
-            blockedAt?: Date;
-            metadata?: Record<string, any>;
-            createdAt: Date;
-            updatedAt: Date;
-            $locals: Record<string, unknown>;
-            $op: "save" | "validate" | "remove" | null;
-            $where: Record<string, unknown>;
-            baseModelName?: string;
-            collection: import("mongoose").Collection;
-            db: import("mongoose").Connection;
-            errors?: import("mongoose").Error.ValidationError;
-            isNew: boolean;
-            schema: import("mongoose").Schema;
-            __v: number;
-        }[];
-        total: number;
-        page: number;
-        totalPages: number;
-    }>;
+    getConversations(req: any, query: GetConversationsQueryDto): Promise<any>;
     getConversation(req: any, id: string): Promise<import("./schemas/conversation.schema").Conversation>;
     archiveConversation(req: any, id: string, dto: ArchiveConversationDto): Promise<import("./schemas/conversation.schema").Conversation>;
     deleteConversation(req: any, id: string): Promise<{
@@ -50,7 +16,7 @@ export declare class ChatController {
     sendMessage(req: any, dto: SendMessageDto): Promise<import("./schemas/message.schema").Message>;
     sendMessageWithAttachments(req: any, dto: SendMessageDto, files: Express.Multer.File[]): Promise<import("./schemas/message.schema").Message>;
     getMessages(req: any, conversationId: string, query: GetMessagesQueryDto): Promise<{
-        messages: (import("./schemas/message.schema").Message & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        messages: (import("mongoose").FlattenMaps<import("./schemas/message.schema").MessageDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;

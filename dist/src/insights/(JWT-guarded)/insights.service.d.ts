@@ -1,8 +1,8 @@
 import { Model, Types } from 'mongoose';
 import { Post, PostDocument } from '../schemas/post.schema';
-import { Category, CategoryDocument } from '../schemas/category.schema';
-import { Tag, TagDocument } from '../schemas/tag.schema';
-import { AuthorProfile, AuthorProfileDocument } from '../schemas/author-profile.schema';
+import { CategoryDocument } from '../schemas/category.schema';
+import { TagDocument } from '../schemas/tag.schema';
+import { AuthorProfileDocument } from '../schemas/author-profile.schema';
 import { CreatePostDto, QueryPostsDto } from '../dto/insights.dto';
 import { InsightsSeoService } from './insights-seo.service';
 import { InsightsRecommendationService } from './insights-recommendation.service';
@@ -15,7 +15,7 @@ export declare class InsightsService {
     private recommendationService;
     constructor(postModel: Model<PostDocument>, categoryModel: Model<CategoryDocument>, tagModel: Model<TagDocument>, authorModel: Model<AuthorProfileDocument>, seoService: InsightsSeoService, recommendationService: InsightsRecommendationService);
     findPublished(query: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -27,24 +27,24 @@ export declare class InsightsService {
             totalPages: number;
         };
     }>;
-    findFeatured(limit?: number): Promise<(Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    findFeatured(limit?: number): Promise<(import("mongoose").FlattenMaps<PostDocument> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
-    findTrending(limit?: number): Promise<(Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    findTrending(limit?: number): Promise<(import("mongoose").FlattenMaps<PostDocument> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
-    findBySlug(slug: string): Promise<Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    findBySlug(slug: string): Promise<import("mongoose").FlattenMaps<PostDocument> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     }>;
     getRelated(slug: string, limit?: number): Promise<any[]>;
     findByCategory(categorySlug: string, query: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -57,7 +57,7 @@ export declare class InsightsService {
         };
     }>;
     findByTag(tagSlug: string, query: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -70,7 +70,7 @@ export declare class InsightsService {
         };
     }>;
     getAuthorWithPosts(authorSlug: string, query: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -81,7 +81,7 @@ export declare class InsightsService {
             limit: number;
             totalPages: number;
         };
-        author: AuthorProfile & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        author: import("mongoose").FlattenMaps<AuthorProfileDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -89,14 +89,14 @@ export declare class InsightsService {
     }>;
     getNeighborhoodGuide(neighborhoodSlug: string): Promise<{
         city: string;
-        posts: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        posts: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
         })[];
     }>;
     getMarketInsights(query: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -109,7 +109,7 @@ export declare class InsightsService {
         };
     }>;
     searchInsights(q: string, params: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;
@@ -121,25 +121,23 @@ export declare class InsightsService {
             totalPages: number;
         };
     }>;
-    getCategories(): Promise<(Category & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    getCategories(): Promise<(import("mongoose").FlattenMaps<CategoryDocument> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
-    getPopularTags(limit?: number): Promise<(Tag & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    getPopularTags(limit?: number): Promise<(import("mongoose").FlattenMaps<TagDocument> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     })[]>;
-    submitDraft(userId: string, createPostDto: CreatePostDto): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, import("mongoose").DefaultSchemaOptions> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    submitDraft(userId: string, createPostDto: CreatePostDto): Promise<import("mongoose").Document<unknown, {}, PostDocument, {}, {}> & Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
-    } & {
-        id: string;
     }>;
     getMySubmissions(userId: string, query: QueryPostsDto): Promise<{
-        data: (Post & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<PostDocument> & Required<{
             _id: Types.ObjectId;
         }> & {
             __v: number;

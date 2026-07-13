@@ -33,107 +33,12 @@ export declare class SavedSearch {
     lastChecked?: Date;
     newMatchingProperties: Types.ObjectId[];
 }
-export declare const SavedSearchSchema: import("mongoose").Schema<SavedSearch, import("mongoose").Model<SavedSearch, any, any, any, any, any, SavedSearch>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, SavedSearch, Document<unknown, {}, SavedSearch, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
+export declare const SavedSearchSchema: import("mongoose").Schema<SavedSearch, import("mongoose").Model<SavedSearch, any, any, any, Document<unknown, any, SavedSearch, any, {}> & SavedSearch & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    userId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    name?: import("mongoose").SchemaDefinitionProperty<string, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    searchCriteria?: import("mongoose").SchemaDefinitionProperty<{
-        minPrice?: number;
-        maxPrice?: number;
-        propertyType?: string;
-        listingType?: string;
-        city?: string;
-        state?: string;
-        bedrooms?: number;
-        bathrooms?: number;
-        amenities?: string[];
-        latitude?: number;
-        longitude?: number;
-        radius?: number;
-    }, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    notificationFrequency?: import("mongoose").SchemaDefinitionProperty<SearchFrequency, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    isActive?: import("mongoose").SchemaDefinitionProperty<boolean, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    resultsCount?: import("mongoose").SchemaDefinitionProperty<number, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    lastNotificationSent?: import("mongoose").SchemaDefinitionProperty<Date | undefined, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    lastChecked?: import("mongoose").SchemaDefinitionProperty<Date | undefined, SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    newMatchingProperties?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId[], SavedSearch, Document<unknown, {}, SavedSearch, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SavedSearch & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, SavedSearch>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, SavedSearch, Document<unknown, {}, import("mongoose").FlatRecord<SavedSearch>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<SavedSearch> & {
+    _id: Types.ObjectId;
+} & {
+    __v: number;
+}>;

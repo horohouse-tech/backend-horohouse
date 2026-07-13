@@ -5,7 +5,7 @@ export declare class CommunityController {
     private readonly communityService;
     constructor(communityService: CommunityService);
     findAll(query: any): Promise<{
-        data: (import("./schemas/community-post.schema").CommunityPost & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/community-post.schema").CommunityPostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -28,7 +28,7 @@ export declare class CommunityController {
     }>;
     incrementView(id: string): Promise<void>;
     getReplies(id: string, query: any): Promise<{
-        data: (import("./schemas/community-post.schema").CommunityPost & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/community-post.schema").CommunityPostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -48,12 +48,10 @@ export declare class CommunityController {
         topContributors: any;
     }>;
     getFlaggedPosts(query: any): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("./schemas/community-post.schema").CommunityPostDocument, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/community-post.schema").CommunityPost & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").Document<unknown, {}, import("./schemas/community-post.schema").CommunityPostDocument, {}, {}> & import("./schemas/community-post.schema").CommunityPost & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
-        } & {
-            id: string;
         })[];
         meta: {
             total: number;
@@ -67,7 +65,7 @@ export declare class CommunityController {
     }>;
     unflagPost(id: string): Promise<import("./schemas/community-post.schema").CommunityPostDocument>;
     getAuthorProfile(userId: string): Promise<{
-        user: import("../users/schemas/user.schema").User & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        user: import("mongoose").FlattenMaps<import("../users/schemas/user.schema").UserDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;
@@ -78,7 +76,7 @@ export declare class CommunityController {
         };
     }>;
     getAuthorPosts(userId: string, query: any): Promise<{
-        data: (import("./schemas/community-post.schema").CommunityPost & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        data: (import("mongoose").FlattenMaps<import("./schemas/community-post.schema").CommunityPostDocument> & Required<{
             _id: import("mongoose").Types.ObjectId;
         }> & {
             __v: number;

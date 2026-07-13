@@ -10,67 +10,12 @@ export declare class Report {
     status: string;
     adminNotes?: string;
 }
-export declare const ReportSchema: MongooseSchema<Report, import("mongoose").Model<Report, any, any, any, any, any, Report>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Report, Document<unknown, {}, Report, {
-    id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<Report & {
+export declare const ReportSchema: MongooseSchema<Report, import("mongoose").Model<Report, any, any, any, Document<unknown, any, Report, any, {}> & Report & {
     _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    reporter?: import("mongoose").SchemaDefinitionProperty<User, Report, Document<unknown, {}, Report, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Report & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    property?: import("mongoose").SchemaDefinitionProperty<Property, Report, Document<unknown, {}, Report, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Report & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    reason?: import("mongoose").SchemaDefinitionProperty<string, Report, Document<unknown, {}, Report, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Report & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    details?: import("mongoose").SchemaDefinitionProperty<string | undefined, Report, Document<unknown, {}, Report, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Report & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    status?: import("mongoose").SchemaDefinitionProperty<string, Report, Document<unknown, {}, Report, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Report & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    adminNotes?: import("mongoose").SchemaDefinitionProperty<string | undefined, Report, Document<unknown, {}, Report, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Report & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, Report>;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Report, Document<unknown, {}, import("mongoose").FlatRecord<Report>, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").FlatRecord<Report> & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}>;

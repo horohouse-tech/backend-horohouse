@@ -148,7 +148,7 @@ export class ChatService {
     async getConversations(
         userId: string,
         query: GetConversationsQueryDto,
-    ) {
+    ): Promise<{ conversations: any[]; total: number; page: number; totalPages: number }> {
         try {
             const { page = 1, limit = 20, includeArchived = false, filter } = query;
             const skip = (page - 1) * limit;
