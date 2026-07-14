@@ -15,7 +15,6 @@ var PushNotificationsService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PushNotificationsService = void 0;
 const common_1 = require("@nestjs/common");
-const expo_server_sdk_1 = require("expo-server-sdk");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_schema_1 = require("../users/schemas/user.schema");
@@ -24,10 +23,16 @@ let PushNotificationsService = PushNotificationsService_1 = class PushNotificati
     userModel;
     devicesService;
     logger = new common_1.Logger(PushNotificationsService_1.name);
-    expo = new expo_server_sdk_1.Expo();
+    expo;
+    ExpoClass;
     constructor(userModel, devicesService) {
         this.userModel = userModel;
         this.devicesService = devicesService;
+    }
+    async onModuleInit() {
+        const { Expo } = await Promise.resolve().then(() => require('expo-server-sdk'));
+        this.ExpoClass = Expo;
+        this.expo = new Expo();
     }
     async sendToUser(userId, payload) {
         const user = await this.userModel.findById(userId).lean();
@@ -41,7 +46,7 @@ let PushNotificationsService = PushNotificationsService_1 = class PushNotificati
         }
         const messages = [];
         for (const { token } of user.pushTokens) {
-            if (!expo_server_sdk_1.Expo.isExpoPushToken(token)) {
+            if (!this.ExpoClass.isExpoPushToken(token)) {
                 this.logger.warn(`Invalid Expo push token skipped: ${token}`);
                 continue;
             }

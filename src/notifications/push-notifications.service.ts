@@ -1,19 +1,26 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import type { Expo as ExpoType, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { DevicesService } from '../devices/devices.service';
 
 @Injectable()
-export class PushNotificationsService {
+export class PushNotificationsService implements OnModuleInit {
   private readonly logger = new Logger(PushNotificationsService.name);
-  private expo = new Expo();
+  private expo: ExpoType;
+  private ExpoClass: typeof ExpoType;
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private devicesService: DevicesService,
   ) {}
+
+  async onModuleInit() {
+    const { Expo } = await import('expo-server-sdk');
+    this.ExpoClass = Expo;
+    this.expo = new Expo();
+  }
 
   async sendToUser(
     userId: string,
@@ -31,7 +38,7 @@ export class PushNotificationsService {
 
     const messages: ExpoPushMessage[] = [];
     for (const { token } of user.pushTokens) {
-      if (!Expo.isExpoPushToken(token)) {
+      if (!this.ExpoClass.isExpoPushToken(token)) {
         this.logger.warn(`Invalid Expo push token skipped: ${token}`);
         continue;
       }
