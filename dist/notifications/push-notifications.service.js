@@ -19,6 +19,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_schema_1 = require("../users/schemas/user.schema");
 const devices_service_1 = require("../devices/devices.service");
+const dynamicImport = new Function('modulePath', 'return import(modulePath)');
 let PushNotificationsService = PushNotificationsService_1 = class PushNotificationsService {
     userModel;
     devicesService;
@@ -30,7 +31,7 @@ let PushNotificationsService = PushNotificationsService_1 = class PushNotificati
         this.devicesService = devicesService;
     }
     async onModuleInit() {
-        const { Expo } = await Promise.resolve().then(() => require('expo-server-sdk'));
+        const { Expo } = await dynamicImport('expo-server-sdk');
         this.ExpoClass = Expo;
         this.expo = new Expo();
     }

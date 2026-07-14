@@ -5,6 +5,12 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { DevicesService } from '../devices/devices.service';
 
+// Forces a genuine runtime dynamic import, bypassing TypeScript's
+// CommonJS transpilation of `import()` into `require()`.
+const dynamicImport = new Function('modulePath', 'return import(modulePath)') as (
+  modulePath: string,
+) => Promise<any>;
+
 @Injectable()
 export class PushNotificationsService implements OnModuleInit {
   private readonly logger = new Logger(PushNotificationsService.name);
@@ -17,7 +23,7 @@ export class PushNotificationsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const { Expo } = await import('expo-server-sdk');
+    const { Expo } = await dynamicImport('expo-server-sdk');
     this.ExpoClass = Expo;
     this.expo = new Expo();
   }
