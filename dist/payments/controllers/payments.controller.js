@@ -28,8 +28,8 @@ let PaymentsController = class PaymentsController {
     async initializePayment(initializePaymentDto, req) {
         return this.paymentsService.initializePayment(initializePaymentDto, req.user);
     }
-    async initiateBookingPayment(bookingId, req) {
-        return this.paymentsService.initiateBookingPayment(bookingId, req.user);
+    async initiateBookingPayment(bookingId, dto, req) {
+        return this.paymentsService.initiateBookingPayment(bookingId, req.user, dto.paymentMethod, dto.phone);
     }
     async verifyPayment(verifyPaymentDto, req) {
         return this.paymentsService.verifyPayment(verifyPaymentDto, req.user);
@@ -98,9 +98,10 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 403, description: 'Caller is not the booking guest' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Booking not found' }),
     __param(0, (0, common_1.Param)('bookingId')),
-    __param(1, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, payment_dto_1.InitiateBookingPaymentDto, Object]),
     __metadata("design:returntype", Promise)
 ], PaymentsController.prototype, "initiateBookingPayment", null);
 __decorate([

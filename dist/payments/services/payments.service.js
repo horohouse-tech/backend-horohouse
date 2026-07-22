@@ -111,7 +111,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             throw error;
         }
     }
-    async initiateBookingPayment(bookingId, user) {
+    async initiateBookingPayment(bookingId, user, selectedMethod, checkoutPhone) {
         this.logger.log(`Initiating booking payment | booking: ${bookingId} | user: ${user._id}`);
         const booking = await this.bookingModel
             .findById(bookingId)
@@ -153,14 +153,26 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         const amount = booking.priceBreakdown.totalAmount;
         const currency = booking.currency ?? transaction_schema_1.Currency.XAF;
         const propertyTitle = booking.propertyId?.title ?? 'Property Booking';
-        const rawPhone = user.phoneNumber ?? '';
+        const rawPhone = checkoutPhone || user.phoneNumber || '';
         if (!rawPhone.trim()) {
             throw new common_1.BadRequestException('A phone number is required to pay. Please add your phone number in your profile settings.');
         }
         const formattedPhone = this.camerPayService.formatPhone(rawPhone);
-        const providerMethod = this.camerPayService.detectOperatorFromPhone(rawPhone);
-        const paymentMethodEnum = providerMethod === 'orange_money' ? transaction_schema_1.PaymentMethod.ORANGE_MONEY : transaction_schema_1.PaymentMethod.MTN_MOMO;
-        this.logger.log(`Detected operator: ${providerMethod} | phone: ${formattedPhone} | customer: ${user.name ?? 'Guest'}`);
+        const detected = this.camerPayService.detectOperatorFromPhone(rawPhone);
+        let providerMethod;
+        let paymentMethodEnum;
+        if (selectedMethod === transaction_schema_1.PaymentMethod.ORANGE_MONEY || selectedMethod === transaction_schema_1.PaymentMethod.MTN_MOMO) {
+            providerMethod = selectedMethod === transaction_schema_1.PaymentMethod.ORANGE_MONEY ? 'orange_money' : 'mtn_momo';
+            paymentMethodEnum = selectedMethod;
+            if (providerMethod !== detected) {
+                this.logger.warn(`User selected ${providerMethod} but phone prefix suggests ${detected} — proceeding with user's selection`);
+            }
+        }
+        else {
+            providerMethod = detected;
+            paymentMethodEnum = detected === 'orange_money' ? transaction_schema_1.PaymentMethod.ORANGE_MONEY : transaction_schema_1.PaymentMethod.MTN_MOMO;
+        }
+        this.logger.log(`Payment method: ${providerMethod} (${selectedMethod ? 'user-selected' : 'auto-detected'}) | phone: ${formattedPhone}`);
         const { platformFee, paymentProcessingFee, netAmount } = this.calculateFees(amount, paymentMethodEnum);
         const transaction = new this.transactionModel({
             userId: user._id,
@@ -177,7 +189,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             netAmount,
             customerName: user.name,
             customerEmail: user.email,
-            customerPhone: user.phoneNumber,
+            customerPhone: formattedPhone,
             metadata: {
                 bookingId,
                 propertyTitle,
@@ -207,9 +219,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         transaction.flutterwaveTransactionId = camerPayResponse.uuid;
         transaction.paymentProviderResponse = camerPayResponse._raw;
         await transaction.save();
-        await this.bookingModel.findByIdAndUpdate(bookingId, {
-            paymentReference: txRef,
-        });
+        await this.bookingModel.findByIdAndUpdate(bookingId, { paymentReference: txRef });
         this.logger.log(`Booking payment initiated | tx: ${transaction._id} | txRef: ${txRef} | ${amount} ${currency}`);
         return { transaction, paymentLink, txRef };
     }
@@ -249,6 +259,31 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             this.logger.error('Verify payment error:', error);
             throw error;
         }
+    }
+    async reconcileTransaction(transaction) {
+        if (transaction.status === transaction_schema_1.TransactionStatus.SUCCESS)
+            return 'unchanged';
+        const providerUuid = transaction.flutterwaveTransactionId;
+        if (!providerUuid)
+            return 'unchanged';
+        const statusResponse = await this.camerPayService.verifyPayment(providerUuid);
+        if (statusResponse.status === 'completed' && statusResponse.amount >= transaction.amount) {
+            transaction.status = transaction_schema_1.TransactionStatus.SUCCESS;
+            transaction.completedAt = new Date(statusResponse.paid_at ?? Date.now());
+            transaction.paymentProviderResponse = statusResponse;
+            await transaction.save();
+            await this.processSuccessfulPayment(transaction);
+            this.logger.log(`Reconciliation: recovered stuck payment — tx: ${transaction._id}`);
+            return 'success';
+        }
+        if (statusResponse.status === 'failed' || statusResponse.status === 'cancelled') {
+            transaction.status = transaction_schema_1.TransactionStatus.FAILED;
+            transaction.failureReason = 'Reconciliation: CamerPay reports failed/cancelled';
+            transaction.paymentProviderResponse = statusResponse;
+            await transaction.save();
+            return 'failed';
+        }
+        return 'unchanged';
     }
     async handleWebhook(rawBody, signature) {
         try {

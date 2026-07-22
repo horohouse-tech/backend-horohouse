@@ -31,6 +31,7 @@ const wallet_controller_1 = require("./controllers/wallet.controller");
 const revenue_analytics_controller_1 = require("./controllers/revenue-analytics.controller");
 const user_schema_1 = require("../users/schemas/user.schema");
 const notifications_module_1 = require("../notifications/notifications.module");
+const payments_scheduler_1 = require("../bookings/payments.scheduler");
 let PaymentsModule = class PaymentsModule {
 };
 exports.PaymentsModule = PaymentsModule;
@@ -73,6 +74,7 @@ exports.PaymentsModule = PaymentsModule = __decorate([
             listing_boost_service_1.ListingBoostService,
             wallet_service_1.WalletService,
             revenue_analytics_service_1.RevenueAnalyticsService,
+            payments_scheduler_1.PaymentsScheduler
         ],
     })
 ], PaymentsModule);

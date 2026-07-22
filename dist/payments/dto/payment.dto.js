@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TransactionQueryDto = exports.FlutterwaveWebhookDto = exports.WithdrawFundsDto = exports.CancelSubscriptionDto = exports.CreateListingBoostDto = exports.CreateSubscriptionDto = exports.VerifyPaymentDto = exports.InitializePaymentDto = void 0;
+exports.TransactionQueryDto = exports.FlutterwaveWebhookDto = exports.InitiateBookingPaymentDto = exports.WithdrawFundsDto = exports.CancelSubscriptionDto = exports.CreateListingBoostDto = exports.CreateSubscriptionDto = exports.VerifyPaymentDto = exports.InitializePaymentDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const transaction_schema_1 = require("../schemas/transaction.schema");
@@ -257,6 +257,23 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], WithdrawFundsDto.prototype, "bankCode", void 0);
+class InitiateBookingPaymentDto {
+    paymentMethod;
+    phone;
+}
+exports.InitiateBookingPaymentDto = InitiateBookingPaymentDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: transaction_schema_1.PaymentMethod, description: 'User-selected operator: mtn_momo or orange_money' }),
+    (0, class_validator_1.IsEnum)(transaction_schema_1.PaymentMethod),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], InitiateBookingPaymentDto.prototype, "paymentMethod", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Mobile money number to charge, if different from profile phone' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], InitiateBookingPaymentDto.prototype, "phone", void 0);
 class FlutterwaveWebhookDto {
     event;
     data;

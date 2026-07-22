@@ -113,16 +113,11 @@ let CamerPayService = CamerPayService_1 = class CamerPayService {
     formatPhone(phone) {
         if (!phone)
             return '';
-        const cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
-        if (cleaned.startsWith('237') && cleaned.length > 9) {
-            return cleaned;
-        }
-        if (cleaned.startsWith('0')) {
-            return `237${cleaned.slice(1)}`;
-        }
-        if (cleaned.length === 9) {
-            return `237${cleaned}`;
-        }
+        let cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
+        if (cleaned.startsWith('237'))
+            cleaned = cleaned.slice(3);
+        else if (cleaned.startsWith('0'))
+            cleaned = cleaned.slice(1);
         return cleaned;
     }
     detectOperatorFromPhone(phone) {

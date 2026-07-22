@@ -37,10 +37,12 @@ let BookingsScheduler = BookingsScheduler_1 = class BookingsScheduler {
             }, {
                 $set: {
                     status: booking_schema_1.BookingStatus.CANCELLED,
-                    'cancellation.cancelledBy': booking_schema_1.CancelledBy.SYSTEM,
-                    'cancellation.cancelledAt': new Date(),
-                    'cancellation.reason': `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`,
-                    'cancellation.refundAmount': 0,
+                    cancellation: {
+                        cancelledBy: booking_schema_1.CancelledBy.SYSTEM,
+                        cancelledAt: new Date(),
+                        reason: `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`,
+                        refundAmount: 0,
+                    },
                 },
             });
             if (result.modifiedCount > 0) {
@@ -62,10 +64,12 @@ let BookingsScheduler = BookingsScheduler_1 = class BookingsScheduler {
             }, {
                 $set: {
                     status: booking_schema_1.BookingStatus.NO_SHOW,
-                    'cancellation.cancelledBy': booking_schema_1.CancelledBy.SYSTEM,
-                    'cancellation.cancelledAt': new Date(),
-                    'cancellation.reason': 'Guest did not check in within grace period',
-                    'cancellation.refundAmount': 0,
+                    cancellation: {
+                        cancelledBy: booking_schema_1.CancelledBy.SYSTEM,
+                        cancelledAt: new Date(),
+                        reason: 'Guest did not check in within grace period',
+                        refundAmount: 0,
+                    },
                 },
             });
             if (result.modifiedCount > 0) {

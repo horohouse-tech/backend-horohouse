@@ -244,36 +244,15 @@ let PropertiesService = PropertiesService_1 = class PropertiesService {
             if (!property) {
                 throw new common_1.NotFoundException('Property not found');
             }
-            if (user) {
-                this.historyService
-                    .logActivity({
-                    userId: user._id,
-                    activityType: history_schema_1.ActivityType.PROPERTY_VIEW,
-                    propertyId: property._id,
-                    agentId: property.agentId?._id ?? property.ownerId,
-                    city: property.city,
-                })
-                    .catch((e) => this.logger.error('History log failed', e));
-                this.updateRecentlyViewed(user._id, property._id)
-                    .catch((e) => this.logger.error('Recently viewed update failed', e));
-                this.userInteractionsService
-                    .trackInteraction({
-                    userId: user._id,
-                    interactionType: user_interaction_schema_1.InteractionType.PROPERTY_VIEW,
-                    propertyId: property._id,
-                    source: user_interaction_schema_1.InteractionSource.DIRECT_LINK,
-                    city: property.city,
-                    propertyType: property.type,
-                    price: property.price,
-                    listingType: property.listingType,
-                    bedrooms: property.amenities?.bedrooms,
-                    bathrooms: property.amenities?.bathrooms,
-                    location: property.location
-                        ? { type: 'Point', coordinates: property.location.coordinates }
-                        : undefined,
-                    neighborhood: property.neighborhood,
-                })
-                    .catch((e) => this.logger.error('Interaction track failed', e));
+            const isOwner = user && property.ownerId?._id?.toString() === user._id.toString();
+            const isAgent = user && property.agentId?._id?.toString() === user._id.toString();
+            const isAdmin = user?.role === user_schema_1.UserRole.ADMIN;
+            if (!isOwner && !isAgent && !isAdmin) {
+                const isVisible = property.isActive === true &&
+                    property.approvalStatus === property_schema_1.ApprovalStatus.APPROVED;
+                if (!isVisible) {
+                    throw new common_1.NotFoundException('Property not found');
+                }
             }
             return property;
         }

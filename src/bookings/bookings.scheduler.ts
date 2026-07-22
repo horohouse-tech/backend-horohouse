@@ -33,23 +33,24 @@ export class BookingsScheduler {
         const cutoff = new Date(Date.now() - AUTO_CANCEL_HOURS * 3_600_000);
 
         try {
-            const result = await this.bookingModel.updateMany(
-                {
-                    status: BookingStatus.PENDING,
-                    paymentStatus: PaymentStatus.UNPAID,
-                    createdAt: { $lt: cutoff },
-                },
-                {
-                    $set: {
-                        status: BookingStatus.CANCELLED,
-                        'cancellation.cancelledBy': CancelledBy.SYSTEM,
-                        'cancellation.cancelledAt': new Date(),
-                        'cancellation.reason':
-                            `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`,
-                        'cancellation.refundAmount': 0,
-                    },
-                },
-            );
+           const result = await this.bookingModel.updateMany(
+    {
+        status: BookingStatus.PENDING,
+        paymentStatus: PaymentStatus.UNPAID,
+        createdAt: { $lt: cutoff },
+    },
+    {
+        $set: {
+            status: BookingStatus.CANCELLED,
+            cancellation: {
+                cancelledBy: CancelledBy.SYSTEM,
+                cancelledAt: new Date(),
+                reason: `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`,
+                refundAmount: 0,
+            },
+        },
+    },
+);
 
             if (result.modifiedCount > 0) {
                 this.logger.log(
@@ -76,22 +77,24 @@ export class BookingsScheduler {
         const graceCutoff = new Date(Date.now() - NO_SHOW_GRACE_HOURS * 3_600_000);
 
         try {
-            const result = await this.bookingModel.updateMany(
-                {
-                    status: BookingStatus.CONFIRMED,
-                    actualCheckIn: { $exists: false },
-                    checkIn: { $lt: graceCutoff },
-                },
-                {
-                    $set: {
-                        status: BookingStatus.NO_SHOW,
-                        'cancellation.cancelledBy': CancelledBy.SYSTEM,
-                        'cancellation.cancelledAt': new Date(),
-                        'cancellation.reason': 'Guest did not check in within grace period',
-                        'cancellation.refundAmount': 0,
-                    },
-                },
-            );
+           const result = await this.bookingModel.updateMany(
+    {
+        status: BookingStatus.CONFIRMED,
+        actualCheckIn: { $exists: false },
+        checkIn: { $lt: graceCutoff },
+    },
+    {
+        $set: {
+            status: BookingStatus.NO_SHOW,
+            cancellation: {
+                cancelledBy: CancelledBy.SYSTEM,
+                cancelledAt: new Date(),
+                reason: 'Guest did not check in within grace period',
+                refundAmount: 0,
+            },
+        },
+    },
+);
 
             if (result.modifiedCount > 0) {
                 this.logger.log(

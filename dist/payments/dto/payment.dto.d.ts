@@ -46,6 +46,10 @@ export declare class WithdrawFundsDto {
     accountName?: string;
     bankCode?: string;
 }
+export declare class InitiateBookingPaymentDto {
+    paymentMethod?: PaymentMethod;
+    phone?: string;
+}
 export declare class FlutterwaveWebhookDto {
     event: string;
     data: {

@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { CamerPayService } from './camerpay.service';
 import { WalletService } from './wallet.service';
-import { Transaction, TransactionDocument } from '../schemas/transaction.schema';
+import { Transaction, TransactionDocument, PaymentMethod } from '../schemas/transaction.schema';
 import { BookingDocument } from '../../bookings/schema/booking.schema';
 import { InitializePaymentDto, VerifyPaymentDto, TransactionQueryDto } from '../dto/payment.dto';
 import { NotificationsService } from '../../notifications/notifications.service';
@@ -23,12 +23,13 @@ export declare class PaymentsService {
         transaction: TransactionDocument;
         paymentLink: string;
     }>;
-    initiateBookingPayment(bookingId: string, user: User): Promise<{
+    initiateBookingPayment(bookingId: string, user: User, selectedMethod?: PaymentMethod, checkoutPhone?: string): Promise<{
         transaction: TransactionDocument;
         paymentLink: string;
         txRef: string;
     }>;
     verifyPayment(dto: VerifyPaymentDto, user: User): Promise<Transaction>;
+    reconcileTransaction(transaction: TransactionDocument): Promise<'success' | 'failed' | 'unchanged'>;
     handleWebhook(rawBody: string, signature: string): Promise<void>;
     getTransactionByReference(txRef: string, userId: string): Promise<Transaction>;
     getUserTransactions(userId: string, query: TransactionQueryDto): Promise<{
@@ -44,7 +45,7 @@ export declare class PaymentsService {
         totalPages: number;
     }>;
     getTransactionById(transactionId: string, userId: string): Promise<Transaction>;
-    private processSuccessfulPayment;
+    processSuccessfulPayment(transaction: TransactionDocument): Promise<void>;
     private confirmBookingPayment;
     private generateTransactionReference;
     private calculateFees;

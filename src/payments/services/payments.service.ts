@@ -332,6 +332,41 @@ async initiateBookingPayment(
   }
 
   // ════════════════════════════════════════════════════════════════════════
+// reconcileTransaction — used by the background reconciliation cron.
+// Same logic as verifyPayment(), but no user/ownership check, since it's
+// triggered by the system, not a user-initiated poll.
+// ════════════════════════════════════════════════════════════════════════
+
+async reconcileTransaction(transaction: TransactionDocument): Promise<'success' | 'failed' | 'unchanged'> {
+  if (transaction.status === TransactionStatus.SUCCESS) return 'unchanged';
+
+  const providerUuid = transaction.flutterwaveTransactionId;
+  if (!providerUuid) return 'unchanged';
+
+  const statusResponse = await this.camerPayService.verifyPayment(providerUuid);
+
+  if (statusResponse.status === 'completed' && statusResponse.amount >= transaction.amount) {
+    transaction.status = TransactionStatus.SUCCESS;
+    transaction.completedAt = new Date(statusResponse.paid_at ?? Date.now());
+    transaction.paymentProviderResponse = statusResponse;
+    await transaction.save();
+    await this.processSuccessfulPayment(transaction);
+    this.logger.log(`Reconciliation: recovered stuck payment — tx: ${transaction._id}`);
+    return 'success';
+  }
+
+  if (statusResponse.status === 'failed' || statusResponse.status === 'cancelled') {
+    transaction.status = TransactionStatus.FAILED;
+    transaction.failureReason = 'Reconciliation: CamerPay reports failed/cancelled';
+    transaction.paymentProviderResponse = statusResponse;
+    await transaction.save();
+    return 'failed';
+  }
+
+  return 'unchanged';
+}
+
+  // ════════════════════════════════════════════════════════════════════════
   // handleWebhook — CamerPay sends POST to your callback_url
   // ════════════════════════════════════════════════════════════════════════
 
@@ -501,7 +536,7 @@ async initiateBookingPayment(
   // PRIVATE HELPERS
   // ════════════════════════════════════════════════════════════════════════
 
-  private async processSuccessfulPayment(transaction: TransactionDocument): Promise<void> {
+  async processSuccessfulPayment(transaction: TransactionDocument): Promise<void> {
     this.logger.log(
       `Processing successful payment: ${transaction._id} | type: ${transaction.type}`,
     );

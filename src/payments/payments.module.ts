@@ -28,6 +28,7 @@ import { WalletController } from './controllers/wallet.controller';
 import { RevenueAnalyticsController } from './controllers/revenue-analytics.controller';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
 import { NotificationsModule } from 'src/notifications/notifications.module';
+import { PaymentsScheduler } from 'src/bookings/payments.scheduler';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
     ListingBoostService,
     WalletService,
     RevenueAnalyticsService,
+    PaymentsScheduler
   ],
 })
 export class PaymentsModule { }

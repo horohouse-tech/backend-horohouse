@@ -1,5 +1,5 @@
 import { PaymentsService } from '../services/payments.service';
-import { InitializePaymentDto, VerifyPaymentDto, TransactionQueryDto } from '../dto/payment.dto';
+import { InitializePaymentDto, VerifyPaymentDto, TransactionQueryDto, InitiateBookingPaymentDto } from '../dto/payment.dto';
 export declare class PaymentsController {
     private readonly paymentsService;
     constructor(paymentsService: PaymentsService);
@@ -7,7 +7,7 @@ export declare class PaymentsController {
         transaction: import("../schemas/transaction.schema").TransactionDocument;
         paymentLink: string;
     }>;
-    initiateBookingPayment(bookingId: string, req: any): Promise<{
+    initiateBookingPayment(bookingId: string, dto: InitiateBookingPaymentDto, req: any): Promise<{
         transaction: import("../schemas/transaction.schema").TransactionDocument;
         paymentLink: string;
         txRef: string;
