@@ -66,6 +66,7 @@ exports.PaymentsModule = PaymentsModule = __decorate([
             listing_boost_service_1.ListingBoostService,
             wallet_service_1.WalletService,
             revenue_analytics_service_1.RevenueAnalyticsService,
+            payments_scheduler_1.PaymentsScheduler,
         ],
         exports: [
             payments_service_1.PaymentsService,

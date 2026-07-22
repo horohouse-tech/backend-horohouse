@@ -61,6 +61,7 @@ import { PaymentsScheduler } from 'src/bookings/payments.scheduler';
     ListingBoostService,
     WalletService,
     RevenueAnalyticsService,
+    PaymentsScheduler,
   ],
   exports: [
     PaymentsService,
