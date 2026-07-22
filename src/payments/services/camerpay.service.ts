@@ -188,16 +188,19 @@ async initializePayment(payload: {
    * "699000000"     → "699000000"  (already correct)
    */
   formatPhone(phone: string): string {
-    if (!phone) return '';
-    const cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
-    if (cleaned.startsWith('237') && cleaned.length > 9) {
-      return cleaned.slice(3); // strip 237
-    }
-    if (cleaned.startsWith('0')) {
-      return cleaned.slice(1); // strip leading 0
-    }
-    return cleaned;
+  if (!phone) return '';
+  const cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
+  if (cleaned.startsWith('237') && cleaned.length > 9) {
+    return cleaned; // keep 237 — CamerPay's documented API expects the full number
   }
+  if (cleaned.startsWith('0')) {
+    return `237${cleaned.slice(1)}`;
+  }
+  if (cleaned.length === 9) {
+    return `237${cleaned}`;
+  }
+  return cleaned;
+}
 
   /**
    * Detects the Mobile Money operator from a Cameroon phone number.

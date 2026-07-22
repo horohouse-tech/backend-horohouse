@@ -37,6 +37,9 @@ const ALLOWED_ORIGINS = [
     'http://192.168.96.37:8081',
     'http://192.168.96.37:8082',
     'http://192.168.96.37:4000',
+    'http://192.168.166.37:8081',
+    'http://192.168.166.37:8082',
+    'http://192.168.166.37:4000',
     'https://backend-horohouse.up.railway.app',
 ];
 const CORS_OPTIONS = {
