@@ -20,14 +20,6 @@ import { InitializePaymentDto, VerifyPaymentDto, TransactionQueryDto } from '../
 import { NotificationsService } from '../../notifications/notifications.service';
 import { User, UserDocument } from '../../users/schemas/user.schema';
 
-// ─── Field-name constants ─────────────────────────────────────────────────────
-// We keep a "providerReference" concept on the transaction so the rest of the
-// app (webhook, verify, queries) doesn't need to know which gateway is in use.
-// Previously stored as `flutterwaveReference` — now aliased below.
-// To avoid a DB migration, we reuse the same schema fields; only the service
-// logic changes.
-// ─────────────────────────────────────────────────────────────────────────────
-
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
@@ -147,9 +139,11 @@ export class PaymentsService {
   // initiateBookingPayment
   // ════════════════════════════════════════════════════════════════════════
 
- async initiateBookingPayment(
+async initiateBookingPayment(
   bookingId: string,
   user: User,
+  selectedMethod?: PaymentMethod,
+  checkoutPhone?: string,
 ): Promise<{ transaction: TransactionDocument; paymentLink: string; txRef: string }> {
   this.logger.log(`Initiating booking payment | booking: ${bookingId} | user: ${user._id}`);
 
@@ -170,7 +164,6 @@ export class PaymentsService {
     throw new BadRequestException('Cannot pay for a cancelled or rejected booking');
   }
 
-  // Idempotency — reuse existing pending transaction
   const existing = await this.transactionModel.findOne({
     bookingId: new Types.ObjectId(bookingId),
     status: TransactionStatus.PENDING,
@@ -198,28 +191,36 @@ export class PaymentsService {
   const currency = (booking.currency as Currency) ?? Currency.XAF;
   const propertyTitle = (booking.propertyId as any)?.title ?? 'Property Booking';
 
-  // ── Guard + detect operator BEFORE building the transaction ──
-  // This replaces the old hardcoded PaymentMethod.MTN_MOMO, which is the
-  // root cause of Orange Money numbers being charged as MTN MoMo.
-  const rawPhone: string = (user as any).phoneNumber ?? '';
+  const rawPhone: string = checkoutPhone || (user as any).phoneNumber || '';
   if (!rawPhone.trim()) {
     throw new BadRequestException(
       'A phone number is required to pay. Please add your phone number in your profile settings.',
     );
   }
   const formattedPhone = this.camerPayService.formatPhone(rawPhone);
-  const providerMethod = this.camerPayService.detectOperatorFromPhone(rawPhone); // 'orange_money' | 'mtn_momo'
-  const paymentMethodEnum =
-    providerMethod === 'orange_money' ? PaymentMethod.ORANGE_MONEY : PaymentMethod.MTN_MOMO;
+  const detected = this.camerPayService.detectOperatorFromPhone(rawPhone);
+
+  let providerMethod: 'orange_money' | 'mtn_momo';
+  let paymentMethodEnum: PaymentMethod;
+
+  if (selectedMethod === PaymentMethod.ORANGE_MONEY || selectedMethod === PaymentMethod.MTN_MOMO) {
+    providerMethod = selectedMethod === PaymentMethod.ORANGE_MONEY ? 'orange_money' : 'mtn_momo';
+    paymentMethodEnum = selectedMethod;
+    if (providerMethod !== detected) {
+      this.logger.warn(
+        `User selected ${providerMethod} but phone prefix suggests ${detected} — proceeding with user's selection`,
+      );
+    }
+  } else {
+    providerMethod = detected;
+    paymentMethodEnum = detected === 'orange_money' ? PaymentMethod.ORANGE_MONEY : PaymentMethod.MTN_MOMO;
+  }
 
   this.logger.log(
-    `Detected operator: ${providerMethod} | phone: ${formattedPhone} | customer: ${user.name ?? 'Guest'}`,
+    `Payment method: ${providerMethod} (${selectedMethod ? 'user-selected' : 'auto-detected'}) | phone: ${formattedPhone}`,
   );
 
-  const { platformFee, paymentProcessingFee, netAmount } = this.calculateFees(
-    amount,
-    paymentMethodEnum,
-  );
+  const { platformFee, paymentProcessingFee, netAmount } = this.calculateFees(amount, paymentMethodEnum);
 
   const transaction = new this.transactionModel({
     userId: user._id,
@@ -236,7 +237,7 @@ export class PaymentsService {
     netAmount,
     customerName: user.name,
     customerEmail: user.email,
-    customerPhone: (user as any).phoneNumber,
+    customerPhone: formattedPhone,
     metadata: {
       bookingId,
       propertyTitle,
@@ -248,7 +249,6 @@ export class PaymentsService {
 
   await transaction.save();
 
-  // ✅ CamerPay rejects localhost return URLs — always use production frontend
   const frontendUrl = this.configService.get<string>('FRONTEND_URL') ?? '';
   const returnUrl = frontendUrl.includes('localhost')
     ? `https://horohouse.com/dashboard/bookings/${bookingId}/payment-callback`
@@ -273,9 +273,7 @@ export class PaymentsService {
   transaction.paymentProviderResponse = camerPayResponse._raw;
   await transaction.save();
 
-  await this.bookingModel.findByIdAndUpdate(bookingId, {
-    paymentReference: txRef,
-  });
+  await this.bookingModel.findByIdAndUpdate(bookingId, { paymentReference: txRef });
 
   this.logger.log(
     `Booking payment initiated | tx: ${transaction._id} | txRef: ${txRef} | ${amount} ${currency}`,

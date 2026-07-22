@@ -187,50 +187,29 @@ async initializePayment(payload: {
    * "+237699000000" → "699000000"
    * "699000000"     → "699000000"  (already correct)
    */
-  formatPhone(phone: string): string {
+formatPhone(phone: string): string {
   if (!phone) return '';
-  const cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
-  if (cleaned.startsWith('237') && cleaned.length > 9) {
-    return cleaned; // keep 237 — CamerPay's documented API expects the full number
-  }
-  if (cleaned.startsWith('0')) {
-    return `237${cleaned.slice(1)}`;
-  }
-  if (cleaned.length === 9) {
-    return `237${cleaned}`;
-  }
+  let cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
+  if (cleaned.startsWith('237')) cleaned = cleaned.slice(3);
+  else if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
   return cleaned;
 }
 
-  /**
-   * Detects the Mobile Money operator from a Cameroon phone number.
-   * Accepts raw or formatted numbers (runs formatPhone internally first).
-   *
-   * MTN MoMo:     67X, 650–654, 680–684
-   * Orange Money: 69X, 655–659, 685–689
-   *
-   * Falls back to 'mtn_momo' for unrecognized prefixes (e.g. Nexttel/Camtel
-   * numbers, or malformed input) — logs a warning so these are visible.
-   */
-  detectOperatorFromPhone(phone: string): 'orange_money' | 'mtn_momo' {
-    const local = this.formatPhone(phone);
-    const p2 = local.slice(0, 2);
-    const p3 = parseInt(local.slice(0, 3), 10);
+detectOperatorFromPhone(phone: string): 'orange_money' | 'mtn_momo' {
+  const local = this.formatPhone(phone);
+  const p2 = local.slice(0, 2);
+  const p3 = parseInt(local.slice(0, 3), 10);
+  if (p2 === '69') return 'orange_money';
+  if (p3 >= 655 && p3 <= 659) return 'orange_money';
+  if (p3 >= 685 && p3 <= 689) return 'orange_money';
+  if (p2 === '67') return 'mtn_momo';
+  if (p3 >= 650 && p3 <= 654) return 'mtn_momo';
+  if (p3 >= 680 && p3 <= 684) return 'mtn_momo';
+  this.logger.warn(`Could not detect MoMo operator for prefix: ${local.slice(0, 3)}`);
+  return 'mtn_momo';
+}
 
-    // Orange Money
-    if (p2 === '69') return 'orange_money';
-    if (p3 >= 655 && p3 <= 659) return 'orange_money';
-    if (p3 >= 685 && p3 <= 689) return 'orange_money';
-
-    // MTN MoMo
-    if (p2 === '67') return 'mtn_momo';
-    if (p3 >= 650 && p3 <= 654) return 'mtn_momo';
-    if (p3 >= 680 && p3 <= 684) return 'mtn_momo';
-
-    this.logger.warn(`Could not detect MoMo operator for prefix: ${local.slice(0, 3)}`);
-    return 'mtn_momo';
-  }
-
+ 
   mapPaymentMethod(operator: string): string {
     const m = (operator ?? '').toLowerCase();
     if (m.includes('orange')) return 'orange_money';

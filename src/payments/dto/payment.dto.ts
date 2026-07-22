@@ -184,6 +184,19 @@ export class WithdrawFundsDto {
   bankCode?: string;
 }
 
+export class InitiateBookingPaymentDto {
+  @ApiPropertyOptional({ enum: PaymentMethod, description: 'User-selected operator: mtn_momo or orange_money' })
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  paymentMethod?: PaymentMethod;
+
+  @ApiPropertyOptional({ description: 'Mobile money number to charge, if different from profile phone' })
+  @IsString()
+  @IsOptional()
+  phone?: string;
+}
+
+
 // Flutterwave Webhook DTO
 export class FlutterwaveWebhookDto {
   @ApiProperty()

@@ -13,6 +13,7 @@ import { UserRole } from '../../users/schemas/user.schema';
 import {
   InitializePaymentDto, VerifyPaymentDto,
   TransactionQueryDto,
+  InitiateBookingPaymentDto,
 } from '../dto/payment.dto';
 
 @ApiTags('Payments')
@@ -62,11 +63,12 @@ export class PaymentsController {
   @ApiResponse({ status: 403, description: 'Caller is not the booking guest' })
   @ApiResponse({ status: 404, description: 'Booking not found' })
   async initiateBookingPayment(
-    @Param('bookingId') bookingId: string,
-    @Req() req: any,
-  ) {
-    return this.paymentsService.initiateBookingPayment(bookingId, req.user);
-  }
+  @Param('bookingId') bookingId: string,
+  @Body() dto: InitiateBookingPaymentDto,
+  @Req() req: any,
+) {
+  return this.paymentsService.initiateBookingPayment(bookingId, req.user, dto.paymentMethod, dto.phone);
+}
 
   // ── Verify payment ────────────────────────────────────────────────────────
 
