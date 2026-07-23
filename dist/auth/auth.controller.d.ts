@@ -13,17 +13,21 @@ declare module 'fastify' {
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
+    private setAuthCookies;
+    private clearAuthCookies;
     sendPhoneCode(dto: SendPhoneCodeDto): Promise<{
         message: string;
     }>;
-    registerWithPhone(dto: RegisterWithPhoneDto, req: FastifyRequest): Promise<AuthTokens>;
-    registerWithEmail(dto: RegisterWithEmailDto, req: FastifyRequest): Promise<AuthTokens>;
-    loginWithPhone(dto: LoginWithPhoneDto, req: FastifyRequest): Promise<AuthTokens>;
-    loginWithEmail(dto: LoginWithEmailDto, req: FastifyRequest): Promise<AuthTokens>;
+    registerWithPhone(dto: RegisterWithPhoneDto, req: FastifyRequest, res: FastifyReply): Promise<AuthTokens>;
+    registerWithEmail(dto: RegisterWithEmailDto, req: FastifyRequest, res: FastifyReply): Promise<AuthTokens>;
+    loginWithPhone(dto: LoginWithPhoneDto, req: FastifyRequest, res: FastifyReply): Promise<AuthTokens>;
+    loginWithEmail(dto: LoginWithEmailDto, req: FastifyRequest, res: FastifyReply): Promise<AuthTokens>;
     verifyPhone(dto: VerifyPhoneDto): Promise<{
         message: string;
     }>;
-    refreshToken({ refreshToken }: RefreshTokenDto, req: FastifyRequest): Promise<AuthTokens>;
+    refreshToken(body: Partial<RefreshTokenDto>, req: FastifyRequest & {
+        cookies?: Record<string, string>;
+    }, res: FastifyReply): Promise<AuthTokens>;
     forgotPassword(dto: ForgotPasswordDto): Promise<{
         message: string;
     }>;
@@ -38,7 +42,7 @@ export declare class AuthController {
     googleAuthRedirect(req: FastifyRequest, res: FastifyReply): Promise<never>;
     logout(req: FastifyRequest & {
         user: User | JwtPayload;
-    }): Promise<void>;
+    }, res: FastifyReply): Promise<void>;
     getProfile(req: FastifyRequest & {
         user: User;
     }): Promise<{

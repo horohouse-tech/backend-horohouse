@@ -8,6 +8,7 @@ const swagger_1 = require("@nestjs/swagger");
 const helmet_1 = require("@fastify/helmet");
 const cors_1 = require("@fastify/cors");
 const multipart_1 = require("@fastify/multipart");
+const cookie_1 = require("@fastify/cookie");
 const mongoose_1 = require("mongoose");
 const app_module_1 = require("./app.module");
 const crypto_1 = require("crypto");
@@ -109,6 +110,9 @@ async function bootstrap() {
     await app.register(helmet_1.default, HELMET_OPTIONS);
     await app.register(cors_1.default, corsOptions);
     await app.register(multipart_1.default, MULTIPART_OPTIONS);
+    await app.register(cookie_1.default, {
+        secret: configService.get('JWT_SECRET', 'horohouse_cookie_secret'),
+    });
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,

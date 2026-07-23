@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
 import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
+import cookie from '@fastify/cookie';
 import mongoose from 'mongoose';
 import { AppModule } from './app.module';
 import { webcrypto } from 'crypto';
@@ -135,6 +136,9 @@ async function bootstrap() {
   await app.register(helmet as any, HELMET_OPTIONS);
   await app.register(cors as any, corsOptions);
   await app.register(multipart as any, MULTIPART_OPTIONS);
+  await app.register(cookie as any, {
+    secret: configService.get<string>('JWT_SECRET', 'horohouse_cookie_secret'),
+  });
 
   // Global pipes
   app.useGlobalPipes(

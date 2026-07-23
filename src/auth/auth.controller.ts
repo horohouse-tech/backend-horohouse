@@ -10,6 +10,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
@@ -55,10 +56,6 @@ class RegisterPhoneDto {
   @IsOptional()
   email?: string;
 
-  @IsString()
-  @IsOptional()
-  role?: string;
-
   @IsOptional()
   deviceInfo?: any;
 }
@@ -79,10 +76,6 @@ class RegisterEmailDto {
   @IsString()
   @IsOptional()
   phoneNumber?: string;
-
-  @IsString()
-  @IsOptional()
-  role?: string;
 
   @IsOptional()
   deviceInfo?: any;
@@ -141,6 +134,33 @@ declare module 'fastify' {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  private setAuthCookies(res: FastifyReply, tokens: AuthTokens) {
+    const isProd = process.env.NODE_ENV === 'production';
+    if (tokens.accessToken) {
+      res.setCookie('access_token', tokens.accessToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60,
+      });
+    }
+    if (tokens.refreshToken) {
+      res.setCookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60,
+      });
+    }
+  }
+
+  private clearAuthCookies(res: FastifyReply) {
+    res.clearCookie('access_token', { path: '/' });
+    res.clearCookie('refresh_token', { path: '/' });
+  }
+
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('send-phone-code')
@@ -163,9 +183,12 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'User already exists' })
   async registerWithPhone(
     @Body() dto: RegisterWithPhoneDto, 
-    @Req() req: FastifyRequest
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
-    return this.authService.registerWithPhone(dto, req);
+    const tokens = await this.authService.registerWithPhone(dto, req);
+    this.setAuthCookies(res, tokens);
+    return tokens;
   }
 
   @Public()
@@ -178,9 +201,12 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'User already exists' })
   async registerWithEmail(
     @Body() dto: RegisterWithEmailDto, 
-    @Req() req: FastifyRequest
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
-    return this.authService.registerWithEmail(dto, req);
+    const tokens = await this.authService.registerWithEmail(dto, req);
+    this.setAuthCookies(res, tokens);
+    return tokens;
   }
 
   @Public()
@@ -193,9 +219,12 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async loginWithPhone(
     @Body() dto: LoginWithPhoneDto, 
-    @Req() req: FastifyRequest
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
-    return this.authService.loginWithPhone(dto, req);
+    const tokens = await this.authService.loginWithPhone(dto, req);
+    this.setAuthCookies(res, tokens);
+    return tokens;
   }
 
   @Public()
@@ -208,9 +237,12 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async loginWithEmail(
     @Body() dto: LoginWithEmailDto, 
-    @Req() req: FastifyRequest
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
-    return this.authService.loginWithEmail(dto, req);
+    const tokens = await this.authService.loginWithEmail(dto, req);
+    this.setAuthCookies(res, tokens);
+    return tokens;
   }
 
   @Public()
@@ -232,10 +264,17 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshToken(
-    @Body() { refreshToken }: RefreshTokenDto, 
-    @Req() req: FastifyRequest
+    @Body() body: Partial<RefreshTokenDto>, 
+    @Req() req: FastifyRequest & { cookies?: Record<string, string> },
+    @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
-    return this.authService.refreshToken(refreshToken, req);
+    const token = body?.refreshToken || req.cookies?.refresh_token;
+    if (!token) {
+      throw new BadRequestException('Refresh token is required');
+    }
+    const tokens = await this.authService.refreshToken(token, req);
+    this.setAuthCookies(res, tokens);
+    return tokens;
   }
 
 
@@ -298,6 +337,8 @@ async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
       picture: googleUser.picture,
     }, req);
 
+    this.setAuthCookies(res, authResult);
+
     let redirectUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     
     // If state contains deep link (e.g., exp://... or horohouse://...), use it
@@ -331,7 +372,10 @@ async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 204, description: 'Logout successful' })
-  async logout(@Req() req: FastifyRequest & { user: User | JwtPayload }) {
+  async logout(
+    @Req() req: FastifyRequest & { user: User | JwtPayload },
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
     let userId: string;
     let sessionId: string | undefined;
 
@@ -343,6 +387,7 @@ async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
     }
 
     await this.authService.logout(userId, sessionId);
+    this.clearAuthCookies(res);
   }
 
   @Get('profile')

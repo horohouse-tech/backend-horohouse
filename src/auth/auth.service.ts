@@ -38,7 +38,6 @@ export interface RegisterWithPhoneDto {
   name: string;
   phoneNumber: string;
   email?: string;
-  role?: UserRole;
   deviceInfo?: any;
 }
 
@@ -47,7 +46,6 @@ export interface RegisterWithEmailDto {
   email: string;
   password: string;
   phoneNumber?: string;
-  role?: UserRole;
   deviceInfo?: any;
 }
 
@@ -199,7 +197,7 @@ export class AuthService {
    */
   async registerWithEmail(dto: RegisterWithEmailDto, req?: any): Promise<AuthTokens> {
     try {
-      const { name, email, password, phoneNumber, role } = dto;
+      const { name, email, password, phoneNumber } = dto;
       // Normalize email
       const normalizedEmail = email.trim().toLowerCase();
 

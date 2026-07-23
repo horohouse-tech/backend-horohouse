@@ -34,7 +34,6 @@ class RegisterPhoneDto {
     name;
     phoneNumber;
     email;
-    role;
     deviceInfo;
 }
 __decorate([
@@ -53,11 +52,6 @@ __decorate([
     __metadata("design:type", String)
 ], RegisterPhoneDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], RegisterPhoneDto.prototype, "role", void 0);
-__decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], RegisterPhoneDto.prototype, "deviceInfo", void 0);
@@ -66,7 +60,6 @@ class RegisterEmailDto {
     email;
     password;
     phoneNumber;
-    role;
     deviceInfo;
 }
 __decorate([
@@ -89,11 +82,6 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], RegisterEmailDto.prototype, "phoneNumber", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], RegisterEmailDto.prototype, "role", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
@@ -163,26 +151,65 @@ let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
+    setAuthCookies(res, tokens) {
+        const isProd = process.env.NODE_ENV === 'production';
+        if (tokens.accessToken) {
+            res.setCookie('access_token', tokens.accessToken, {
+                httpOnly: true,
+                secure: isProd,
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 7 * 24 * 60 * 60,
+            });
+        }
+        if (tokens.refreshToken) {
+            res.setCookie('refresh_token', tokens.refreshToken, {
+                httpOnly: true,
+                secure: isProd,
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 30 * 24 * 60 * 60,
+            });
+        }
+    }
+    clearAuthCookies(res) {
+        res.clearCookie('access_token', { path: '/' });
+        res.clearCookie('refresh_token', { path: '/' });
+    }
     async sendPhoneCode(dto) {
         return this.authService.sendPhoneVerificationCode(dto);
     }
-    async registerWithPhone(dto, req) {
-        return this.authService.registerWithPhone(dto, req);
+    async registerWithPhone(dto, req, res) {
+        const tokens = await this.authService.registerWithPhone(dto, req);
+        this.setAuthCookies(res, tokens);
+        return tokens;
     }
-    async registerWithEmail(dto, req) {
-        return this.authService.registerWithEmail(dto, req);
+    async registerWithEmail(dto, req, res) {
+        const tokens = await this.authService.registerWithEmail(dto, req);
+        this.setAuthCookies(res, tokens);
+        return tokens;
     }
-    async loginWithPhone(dto, req) {
-        return this.authService.loginWithPhone(dto, req);
+    async loginWithPhone(dto, req, res) {
+        const tokens = await this.authService.loginWithPhone(dto, req);
+        this.setAuthCookies(res, tokens);
+        return tokens;
     }
-    async loginWithEmail(dto, req) {
-        return this.authService.loginWithEmail(dto, req);
+    async loginWithEmail(dto, req, res) {
+        const tokens = await this.authService.loginWithEmail(dto, req);
+        this.setAuthCookies(res, tokens);
+        return tokens;
     }
     async verifyPhone(dto) {
         return this.authService.verifyPhone(dto);
     }
-    async refreshToken({ refreshToken }, req) {
-        return this.authService.refreshToken(refreshToken, req);
+    async refreshToken(body, req, res) {
+        const token = body?.refreshToken || req.cookies?.refresh_token;
+        if (!token) {
+            throw new common_1.BadRequestException('Refresh token is required');
+        }
+        const tokens = await this.authService.refreshToken(token, req);
+        this.setAuthCookies(res, tokens);
+        return tokens;
     }
     async forgotPassword(dto) {
         return this.authService.requestPasswordReset(dto.email);
@@ -205,6 +232,7 @@ let AuthController = class AuthController {
                 name: googleUser.displayName,
                 picture: googleUser.picture,
             }, req);
+            this.setAuthCookies(res, authResult);
             let redirectUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
             if (state && (state.startsWith('exp://') || state.startsWith('horohouse://') || state.startsWith('http'))) {
                 const separator = state.includes('?') ? '&' : '?';
@@ -229,7 +257,7 @@ let AuthController = class AuthController {
             return res;
         }
     }
-    async logout(req) {
+    async logout(req, res) {
         let userId;
         let sessionId;
         if ('_id' in req.user) {
@@ -240,6 +268,7 @@ let AuthController = class AuthController {
             sessionId = req.user.sessionId;
         }
         await this.authService.logout(userId, sessionId);
+        this.clearAuthCookies(res);
     }
     async getProfile(req) {
         return {
@@ -342,8 +371,9 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 409, description: 'User already exists' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerWithPhone", null);
 __decorate([
@@ -357,8 +387,9 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 409, description: 'User already exists' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerWithEmail", null);
 __decorate([
@@ -372,8 +403,9 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginWithPhone", null);
 __decorate([
@@ -387,8 +419,9 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginWithEmail", null);
 __decorate([
@@ -414,8 +447,9 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid refresh token' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [RefreshTokenDto, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refreshToken", null);
 __decorate([
@@ -485,8 +519,9 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Logout user' }),
     (0, swagger_1.ApiResponse)({ status: 204, description: 'Logout successful' }),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 __decorate([

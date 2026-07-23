@@ -108,7 +108,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async registerWithEmail(dto, req) {
         try {
-            const { name, email, password, phoneNumber, role } = dto;
+            const { name, email, password, phoneNumber } = dto;
             const normalizedEmail = email.trim().toLowerCase();
             const existingUser = await this.userModel.findOne({
                 $or: [
