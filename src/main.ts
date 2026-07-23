@@ -136,19 +136,20 @@ async function bootstrap() {
   // its normal JSON parsing behaviour.
   const fastify = app.getHttpAdapter().getInstance();
 
-  fastify.addHook(
-    'preHandler',
-    async (request: any, _reply: any) => {
-      const webhookPath = '/api/v1/payments/webhook/camerpay';
-      if (request.url === webhookPath && request.method === 'POST') {
-        // At preHandler time Fastify has already parsed the body into an object.
-        // Re-serialise it as the canonical raw string for HMAC.
-        // This is equivalent to the raw body as long as CamerPay sends
-        // compact JSON without extra whitespace (which all webhook providers do).
-        request.rawBody = Buffer.from(JSON.stringify(request.body), 'utf8');
-      }
-    },
-  );
+ fastify.addContentTypeParser(
+  'application/json',
+  { parseAs: 'buffer' },
+  (req: any, body: Buffer, done: any) => {
+    req.rawBody = body; // exact bytes, always
+    try {
+      const json = body.length ? JSON.parse(body.toString('utf8')) : {};
+      done(null, json);
+    } catch (err: any) {
+      err.statusCode = 400;
+      done(err, undefined);
+    }
+  },
+);
   // ────────────────────────────────────────────────────────────────────────
 
   // Plugins

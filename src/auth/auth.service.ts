@@ -90,7 +90,7 @@ export class AuthService {
     private emailService: EmailService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   /**
    * Send phone verification code
@@ -119,7 +119,7 @@ export class AuthService {
 
       // Send SMS
       const smsSent = await this.smsService.sendVerificationCode(formattedPhone, verificationCode);
-      
+
       if (!smsSent) {
         throw new BadRequestException('Failed to send verification code');
       }
@@ -138,8 +138,7 @@ export class AuthService {
    */
   async registerWithPhone(dto: RegisterWithPhoneDto, req?: any): Promise<AuthTokens> {
     try {
-      const { name, phoneNumber, email, role } = dto;
-
+      const { name, phoneNumber, email } = dto; // role intentionally not destructured
       const formattedPhone = this.smsService.formatPhoneNumber(phoneNumber);
 
       // Check if user already exists
@@ -159,7 +158,7 @@ export class AuthService {
         name,
         phoneNumber: formattedPhone,
         email,
-        role: role || UserRole.REGISTERED_USER,
+        role: UserRole.REGISTERED_USER, // always forced, never from input
         phoneVerified: false,
         emailVerified: false,
       });
@@ -170,7 +169,7 @@ export class AuthService {
       if (user.email) {
         const verificationToken = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-        
+
         await this.userModel.findByIdAndUpdate(user._id, {
           emailVerificationToken: verificationToken,
           emailVerificationExpires: expiresAt
@@ -178,7 +177,7 @@ export class AuthService {
 
         // Send welcome email
         void this.emailService.sendWelcomeEmail(user.email, user.name).catch(() => undefined);
-        
+
         // Send verification email
         void this.emailService.sendEmailVerification(user.email, user.name, verificationToken).catch(() => undefined);
       }
@@ -201,7 +200,6 @@ export class AuthService {
   async registerWithEmail(dto: RegisterWithEmailDto, req?: any): Promise<AuthTokens> {
     try {
       const { name, email, password, phoneNumber, role } = dto;
-
       // Normalize email
       const normalizedEmail = email.trim().toLowerCase();
 
@@ -226,7 +224,7 @@ export class AuthService {
         email: normalizedEmail,
         password: hashedPassword,
         phoneNumber: phoneNumber || `temp_${Date.now()}`, // Temporary phone number
-        role: role || UserRole.REGISTERED_USER,
+        role: UserRole.REGISTERED_USER,
         phoneVerified: false,
         emailVerified: false,
       });
@@ -236,7 +234,7 @@ export class AuthService {
       // Send both welcome email and verification email
       const verificationToken = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      
+
       await this.userModel.findByIdAndUpdate(user._id, {
         emailVerificationToken: verificationToken,
         emailVerificationExpires: expiresAt
@@ -244,7 +242,7 @@ export class AuthService {
 
       // Send welcome email
       void this.emailService.sendWelcomeEmail(user.email!, user.name).catch(() => undefined);
-      
+
       // Send verification email
       void this.emailService.sendEmailVerification(user.email!, user.name, verificationToken).catch(() => undefined);
 
@@ -468,10 +466,10 @@ export class AuthService {
           this.logger.warn(`Refresh attempt for user ${user._id} provided sessionId ${payload.sessionId} but no active session was found`);
         }
       }
+      const hashedIncoming = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-      // Fallback: try to find a session that matches the refresh token value itself.
       if (!session) {
-        session = user.sessions.find(s => s.refreshToken === refreshToken && s.isActive);
+        session = user.sessions.find(s => s.refreshToken === hashedIncoming && s.isActive);
       }
 
       if (!session) {
@@ -542,9 +540,9 @@ export class AuthService {
         // Remove all sessions if no specific sessionId
         user.sessions = [];
       }
-      
+
       await user.save();
-      
+
       this.logger.log(`User logged out: ${userId}${sessionId ? ` (session: ${sessionId})` : ' (all sessions)'}`);
     } catch (error) {
       this.logger.error('Logout failed:', error);
@@ -631,14 +629,14 @@ export class AuthService {
     try {
       const userId = user._id ? user._id.toString() : (user as any).id || (user as any).sub;
       const userDoc = await this.userModel.findById(userId);
-      
+
       if (!userDoc) {
         throw new NotFoundException('User not found');
       }
 
       // Remove expired sessions and return active ones
       const now = new Date();
-      const activeSessions = userDoc.sessions.filter(session => 
+      const activeSessions = userDoc.sessions.filter(session =>
         session.isActive && session.expiresAt > now
       );
 
@@ -648,7 +646,7 @@ export class AuthService {
         await userDoc.save();
       }
 
-      const plainSessions = userDoc.toObject().sessions; 
+      const plainSessions = userDoc.toObject().sessions;
 
       return plainSessions.map((session: any) => ({
         ...session,
@@ -667,7 +665,7 @@ export class AuthService {
     try {
       const userId = user._id ? user._id.toString() : (user as any).id || (user as any).sub;
       const userDoc = await this.userModel.findById(userId);
-      
+
       if (!userDoc) {
         throw new NotFoundException('User not found');
       }
@@ -675,13 +673,13 @@ export class AuthService {
       // Remove the specific session
       const originalSessionCount = userDoc.sessions.length;
       userDoc.sessions = userDoc.sessions.filter(s => s.id !== sessionId);
-      
+
       if (userDoc.sessions.length === originalSessionCount) {
         throw new NotFoundException('Session not found');
       }
 
       await userDoc.save();
-      
+
       this.logger.log(`Session ${sessionId} terminated for user: ${userId}`);
 
       return { message: 'Session terminated successfully' };
@@ -698,7 +696,7 @@ export class AuthService {
     try {
       const userId = user._id ? user._id.toString() : (user as any).id || (user as any).sub;
       const userDoc = await this.userModel.findById(userId);
-      
+
       if (!userDoc) {
         throw new NotFoundException('User not found');
       }
@@ -712,7 +710,7 @@ export class AuthService {
       }
 
       await userDoc.save();
-      
+
       this.logger.log(`All other sessions terminated for user: ${userId}`);
 
       return { message: 'All other sessions terminated successfully' };
@@ -776,7 +774,7 @@ export class AuthService {
 
       // Send SMS
       const smsSent = await this.smsService.sendVerificationCode(user.phoneNumber, verificationCode);
-      
+
       if (!smsSent) {
         throw new BadRequestException('Failed to send verification code');
       }
@@ -818,139 +816,139 @@ export class AuthService {
     }
   }
 
-/**
- * Request password reset - Send reset email
- */
-async requestPasswordReset(email: string): Promise<{ message: string }> {
-  try {
-    const normalizedEmail = email.trim().toLowerCase();
-
-    // Find user by email (case-insensitive)
-    const user = await this.userModel.findOne({
-      email: { $regex: `^${normalizedEmail}$`, $options: 'i' }
-    });
-
-    // Always return success message (don't reveal if email exists)
-    if (!user) {
-      this.logger.log(`Password reset requested for non-existent email: ${normalizedEmail}`);
-      return { message: 'If an account exists with this email, you will receive a password reset link shortly.' };
-    }
-
-    // Check if user has a password (not OAuth-only user)
-    if (!user.password) {
-      this.logger.log(`Password reset requested for OAuth-only user: ${normalizedEmail}`);
-      return { message: 'If an account exists with this email, you will receive a password reset link shortly.' };
-    }
-
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    // Save hashed token to database
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = expiresAt;
-    await user.save();
-
-    this.logger.log(`Password reset token generated for user: ${user._id}`);
-
-    // Send reset email
+  /**
+   * Request password reset - Send reset email
+   */
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
     try {
-      await this.emailService.sendPasswordResetEmail(
-        user.email!,
-        user.name,
-        resetToken // Send unhashed token in email
-      );
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // Find user by email (case-insensitive)
+      const user = await this.userModel.findOne({
+        email: { $regex: `^${normalizedEmail}$`, $options: 'i' }
+      });
+
+      // Always return success message (don't reveal if email exists)
+      if (!user) {
+        this.logger.log(`Password reset requested for non-existent email: ${normalizedEmail}`);
+        return { message: 'If an account exists with this email, you will receive a password reset link shortly.' };
+      }
+
+      // Check if user has a password (not OAuth-only user)
+      if (!user.password) {
+        this.logger.log(`Password reset requested for OAuth-only user: ${normalizedEmail}`);
+        return { message: 'If an account exists with this email, you will receive a password reset link shortly.' };
+      }
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      // Save hashed token to database
+      user.resetPasswordToken = hashedToken;
+      user.resetPasswordExpires = expiresAt;
+      await user.save();
+
+      this.logger.log(`Password reset token generated for user: ${user._id}`);
+
+      // Send reset email
+      try {
+        await this.emailService.sendPasswordResetEmail(
+          user.email!,
+          user.name,
+          resetToken // Send unhashed token in email
+        );
+      } catch (error) {
+        this.logger.error('Failed to send password reset email:', error);
+        // Don't throw error to user - just log it
+      }
+
+      return { message: 'If an account exists with this email, you will receive a password reset link shortly.' };
     } catch (error) {
-      this.logger.error('Failed to send password reset email:', error);
-      // Don't throw error to user - just log it
+      this.logger.error('Password reset request failed:', error);
+      throw new BadRequestException('Failed to process password reset request');
     }
-
-    return { message: 'If an account exists with this email, you will receive a password reset link shortly.' };
-  } catch (error) {
-    this.logger.error('Password reset request failed:', error);
-    throw new BadRequestException('Failed to process password reset request');
   }
-}
 
-/**
- * Validate reset token
- */
-async validateResetToken(token: string): Promise<{ valid: boolean; email?: string }> {
-  try {
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  /**
+   * Validate reset token
+   */
+  async validateResetToken(token: string): Promise<{ valid: boolean; email?: string }> {
+    try {
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    const user = await this.userModel.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: new Date() }
-    });
+      const user = await this.userModel.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: new Date() }
+      });
 
-    if (!user) {
+      if (!user) {
+        return { valid: false };
+      }
+
+      return {
+        valid: true,
+        email: user.email
+      };
+    } catch (error) {
+      this.logger.error('Token validation failed:', error);
       return { valid: false };
     }
-
-    return { 
-      valid: true, 
-      email: user.email 
-    };
-  } catch (error) {
-    this.logger.error('Token validation failed:', error);
-    return { valid: false };
   }
-}
 
-/**
- * Reset password with token
- */
-async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-  try {
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
-    // Find user with valid reset token
-    const user = await this.userModel.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: new Date() }
-    });
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid or expired password reset token');
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-    // Update password and clear reset token
-    user.password = hashedPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-
-    // Invalidate all existing sessions for security
-    user.sessions = [];
-
-    await user.save();
-
-    this.logger.log(`Password reset successfully for user: ${user._id}`);
-
-    // Send confirmation email
+  /**
+   * Reset password with token
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
     try {
-      await this.emailService.sendPasswordResetConfirmation(
-        user.email!,
-        user.name
-      );
-    } catch (error) {
-      this.logger.error('Failed to send password reset confirmation:', error);
-      // Don't throw error - password was already reset
-    }
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    return { message: 'Password has been reset successfully. You can now sign in with your new password.' };
-  } catch (error) {
-    if (error instanceof UnauthorizedException) {
-      throw error;
+      // Find user with valid reset token
+      const user = await this.userModel.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: new Date() }
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid or expired password reset token');
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+      // Update password and clear reset token
+      user.password = hashedPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+
+      // Invalidate all existing sessions for security
+      user.sessions = [];
+
+      await user.save();
+
+      this.logger.log(`Password reset successfully for user: ${user._id}`);
+
+      // Send confirmation email
+      try {
+        await this.emailService.sendPasswordResetConfirmation(
+          user.email!,
+          user.name
+        );
+      } catch (error) {
+        this.logger.error('Failed to send password reset confirmation:', error);
+        // Don't throw error - password was already reset
+      }
+
+      return { message: 'Password has been reset successfully. You can now sign in with your new password.' };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      this.logger.error('Password reset failed:', error);
+      throw new BadRequestException('Failed to reset password');
     }
-    this.logger.error('Password reset failed:', error);
-    throw new BadRequestException('Failed to reset password');
   }
-}
 
   /**
    * Generate JWT tokens and create session
@@ -961,7 +959,7 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
   }> {
     // Generate session ID
     const sessionId = existingSessionId || crypto.randomUUID();
-    
+
     const payload: JwtPayload = {
       sub: user._id.toString(),
       phoneNumber: user.phoneNumber,
@@ -994,10 +992,12 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
       const deviceInfo = req?.body?.deviceInfo || {};
       const userAgent = req?.headers?.['user-agent'] || 'Unknown';
       const ipAddress = this.getClientIp(req);
-      
+
+      const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
       const newSession: UserSession = {
         id: sessionId,
-        refreshToken,
+        refreshToken: hashedRefreshToken,
         device: this.parseDeviceInfo(userAgent, deviceInfo),
         ipAddress,
         userAgent,
@@ -1041,16 +1041,16 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
    */
   private getClientIp(req?: any): string {
     if (!req) return 'Unknown';
-    
-    return req.ip || 
-           req.connection?.remoteAddress || 
-           req.socket?.remoteAddress ||
-           (req.headers && (
-             req.headers['x-forwarded-for']?.split(',')[0] ||
-             req.headers['x-real-ip'] ||
-             req.headers['x-client-ip']
-           )) ||
-           'Unknown';
+
+    return req.ip ||
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress ||
+      (req.headers && (
+        req.headers['x-forwarded-for']?.split(',')[0] ||
+        req.headers['x-real-ip'] ||
+        req.headers['x-client-ip']
+      )) ||
+      'Unknown';
   }
 
   /**
@@ -1063,7 +1063,7 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
 
     // Simple user agent parsing
     const ua = userAgent.toLowerCase();
-    
+
     let browser = 'Unknown Browser';
     let os = 'Unknown OS';
 
@@ -1093,11 +1093,11 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
     // - IPInfo.io
     // - ip-api.com
     // For now, return a mock location
-    
+
     if (ipAddress === 'Unknown' || ipAddress.startsWith('127.') || ipAddress.startsWith('192.168.')) {
       return 'Local Network';
     }
-    
+
     // Mock location - in production, integrate with a real geolocation service
     return 'Unknown Location';
   }
@@ -1108,14 +1108,14 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
   private parseTokenExpiration(expiration: string): number {
     const regex = /^(\d+)([smhd])$/;
     const match = expiration.match(regex);
-    
+
     if (!match) {
       return 7 * 24 * 60 * 60 * 1000; // Default 7 days
     }
-    
+
     const [, value, unit] = match;
     const num = parseInt(value, 10);
-    
+
     switch (unit) {
       case 's': return num * 1000;
       case 'm': return num * 60 * 1000;
@@ -1135,7 +1135,7 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
         { 'sessions.expiresAt': { $lt: now } },
         { $pull: { sessions: { expiresAt: { $lt: now } } } }
       );
-      
+
       this.logger.log('Expired sessions cleaned up');
     } catch (error) {
       this.logger.error('Failed to cleanup expired sessions:', error);
