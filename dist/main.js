@@ -14,47 +14,28 @@ const crypto_1 = require("crypto");
 if (!globalThis.crypto) {
     globalThis.crypto = crypto_1.webcrypto;
 }
-const ALLOWED_ORIGINS = [
-    'https://horohouse.com',
-    'https://www.horohouse.com',
-    'http://localhost:3000',
-    'http://localhost:8081',
-    'http://localhost:8082',
-    'http://192.168.173.37:8081',
-    'http://192.168.173.37:8082',
-    'http://192.168.173.37:4000',
-    'http://192.168.80.37:8081',
-    'http://192.168.80.37:8082',
-    'http://192.168.80.37:4000',
-    'http://10.48.115.37:8081',
-    'http://10.48.115.37:8082',
-    'http://192.168.64.37:8081',
-    'http://192.168.64.37:8082',
-    'http://192.168.64.37:4000',
-    'http://192.168.254.37:8081',
-    'http://192.168.254.37:8082',
-    'http://192.168.254.37:4000',
-    'http://192.168.96.37:8081',
-    'http://192.168.96.37:8082',
-    'http://192.168.96.37:4000',
-    'http://192.168.166.37:8081',
-    'http://192.168.166.37:8082',
-    'http://192.168.166.37:4000',
-    'https://backend-horohouse.up.railway.app',
-];
-const CORS_OPTIONS = {
-    origin: ALLOWED_ORIGINS,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'Accept',
-        'Origin',
-        'X-Requested-With',
-        'X-CamerPay-Signature',
-    ],
-};
+function getAllowedOrigins(isProduction, customOrigins) {
+    if (customOrigins) {
+        return customOrigins.split(',').map((o) => o.trim());
+    }
+    const prodOrigins = [
+        'https://horohouse.com',
+        'https://www.horohouse.com',
+        'https://backend-horohouse.up.railway.app',
+    ];
+    if (isProduction) {
+        return prodOrigins;
+    }
+    const devOrigins = [
+        'http://localhost:3000',
+        'http://localhost:8081',
+        'http://localhost:8082',
+        'http://localhost:4000',
+        /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/,
+        /^http:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/,
+    ];
+    return [...prodOrigins, ...devOrigins];
+}
 const HELMET_OPTIONS = {
     contentSecurityPolicy: {
         directives: {
@@ -103,20 +84,30 @@ function setupMongoEvents(logger) {
 }
 async function bootstrap() {
     const logger = new common_1.Logger('Bootstrap');
-    const fastifyAdapter = new platform_fastify_1.FastifyAdapter({ logger: false });
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, fastifyAdapter);
+    const fastifyAdapter = new platform_fastify_1.FastifyAdapter({
+        logger: false,
+    });
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, fastifyAdapter, { rawBody: true });
     const configService = app.get(config_1.ConfigService);
     const port = configService.get('PORT', 3000);
     const isProduction = configService.get('NODE_ENV') === 'production';
-    const fastify = app.getHttpAdapter().getInstance();
-    fastify.addHook('preHandler', async (request, _reply) => {
-        const webhookPath = '/api/v1/payments/webhook/camerpay';
-        if (request.url === webhookPath && request.method === 'POST') {
-            request.rawBody = Buffer.from(JSON.stringify(request.body), 'utf8');
-        }
-    });
+    const customOrigins = configService.get('ALLOWED_ORIGINS');
+    const allowedOrigins = getAllowedOrigins(isProduction, customOrigins);
+    const corsOptions = {
+        origin: allowedOrigins,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization',
+            'Accept',
+            'Origin',
+            'X-Requested-With',
+            'X-CamerPay-Signature',
+        ],
+    };
     await app.register(helmet_1.default, HELMET_OPTIONS);
-    await app.register(cors_1.default, CORS_OPTIONS);
+    await app.register(cors_1.default, corsOptions);
     await app.register(multipart_1.default, MULTIPART_OPTIONS);
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
@@ -138,7 +129,7 @@ async function bootstrap() {
     await app.listen(port, '0.0.0.0');
     logger.log(`🚀 HoroHouse Backend running on port ${port}`);
     logger.log(`🔌 WebSocket ready`);
-    logger.log(`🌍 Allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
+    logger.log(`🌍 Allowed origins: ${allowedOrigins.map(o => o.toString()).join(', ')}`);
     logger.log(`🔑 JWT Secret configured: ${!!configService.get('JWT_SECRET')}`);
     logger.log(`💳 CamerPay webhook: POST /api/v1/payments/webhook/camerpay`);
 }

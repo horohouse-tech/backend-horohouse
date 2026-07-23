@@ -65,7 +65,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async registerWithPhone(dto, req) {
         try {
-            const { name, phoneNumber, email, role } = dto;
+            const { name, phoneNumber, email } = dto;
             const formattedPhone = this.smsService.formatPhoneNumber(phoneNumber);
             const existingUser = await this.userModel.findOne({
                 $or: [
@@ -80,7 +80,7 @@ let AuthService = AuthService_1 = class AuthService {
                 name,
                 phoneNumber: formattedPhone,
                 email,
-                role: role || user_schema_1.UserRole.REGISTERED_USER,
+                role: user_schema_1.UserRole.REGISTERED_USER,
                 phoneVerified: false,
                 emailVerified: false,
             });
@@ -125,7 +125,7 @@ let AuthService = AuthService_1 = class AuthService {
                 email: normalizedEmail,
                 password: hashedPassword,
                 phoneNumber: phoneNumber || `temp_${Date.now()}`,
-                role: role || user_schema_1.UserRole.REGISTERED_USER,
+                role: user_schema_1.UserRole.REGISTERED_USER,
                 phoneVerified: false,
                 emailVerified: false,
             });
@@ -300,8 +300,9 @@ let AuthService = AuthService_1 = class AuthService {
                     this.logger.warn(`Refresh attempt for user ${user._id} provided sessionId ${payload.sessionId} but no active session was found`);
                 }
             }
+            const hashedIncoming = crypto.createHash('sha256').update(refreshToken).digest('hex');
             if (!session) {
-                session = user.sessions.find(s => s.refreshToken === refreshToken && s.isActive);
+                session = user.sessions.find(s => s.refreshToken === hashedIncoming && s.isActive);
             }
             if (!session) {
                 this.logger.error(`Invalid refresh token for user ${user._id}: session not found (payload.sessionId=${payload?.sessionId})`);
@@ -656,9 +657,10 @@ let AuthService = AuthService_1 = class AuthService {
             const deviceInfo = req?.body?.deviceInfo || {};
             const userAgent = req?.headers?.['user-agent'] || 'Unknown';
             const ipAddress = this.getClientIp(req);
+            const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
             const newSession = {
                 id: sessionId,
-                refreshToken,
+                refreshToken: hashedRefreshToken,
                 device: this.parseDeviceInfo(userAgent, deviceInfo),
                 ipAddress,
                 userAgent,

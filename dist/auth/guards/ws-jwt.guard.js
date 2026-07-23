@@ -8,40 +8,39 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var WsJwtGuard_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WsJwtGuard = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const websockets_1 = require("@nestjs/websockets");
-let WsJwtGuard = WsJwtGuard_1 = class WsJwtGuard {
+const auth_service_1 = require("../auth.service");
+let WsJwtGuard = class WsJwtGuard {
     jwtService;
-    logger = new common_1.Logger(WsJwtGuard_1.name);
-    constructor(jwtService) {
+    authService;
+    constructor(jwtService, authService) {
         this.jwtService = jwtService;
+        this.authService = authService;
     }
     async canActivate(context) {
+        const client = context.switchToWs().getClient();
+        const token = client.handshake?.auth?.token;
+        if (!token)
+            throw new websockets_1.WsException('Unauthorized: No token provided');
         try {
-            const client = context.switchToWs().getClient();
-            const token = client.handshake?.auth?.token;
-            if (!token) {
-                this.logger.warn('No token provided in WebSocket connection');
-                throw new websockets_1.WsException('Unauthorized: No token provided');
-            }
             const payload = await this.jwtService.verifyAsync(token);
-            client.data.user = payload;
-            this.logger.log(`WebSocket authenticated: ${payload.userId}`);
+            const user = await this.authService.validateUser(payload);
+            client.data.user = user;
             return true;
         }
         catch (error) {
-            this.logger.error('WebSocket authentication failed:', error.message);
-            throw new websockets_1.WsException('Unauthorized: Invalid token');
+            throw new websockets_1.WsException('Unauthorized: Invalid or revoked token');
         }
     }
 };
 exports.WsJwtGuard = WsJwtGuard;
-exports.WsJwtGuard = WsJwtGuard = WsJwtGuard_1 = __decorate([
+exports.WsJwtGuard = WsJwtGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [jwt_1.JwtService])
+    __metadata("design:paramtypes", [jwt_1.JwtService,
+        auth_service_1.AuthService])
 ], WsJwtGuard);
 //# sourceMappingURL=ws-jwt.guard.js.map

@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const throttler_1 = require("@nestjs/throttler");
 const auth_service_1 = require("./auth.service");
 const roles_guard_1 = require("./guards/roles.guard");
 const jwt_auth_guard_1 = require("./guards/jwt.auth.guard");
@@ -318,6 +319,7 @@ let AuthController = class AuthController {
 exports.AuthController = AuthController;
 __decorate([
     (0, roles_guard_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { limit: 5, ttl: 60000 } }),
     (0, common_1.Post)('send-phone-code'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Send phone verification code' }),
@@ -331,6 +333,7 @@ __decorate([
 ], AuthController.prototype, "sendPhoneCode", null);
 __decorate([
     (0, roles_guard_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, common_1.Post)('register/phone'),
     (0, swagger_1.ApiOperation)({ summary: 'Register with phone number' }),
     (0, swagger_1.ApiBody)({ type: RegisterPhoneDto }),
@@ -345,6 +348,7 @@ __decorate([
 ], AuthController.prototype, "registerWithPhone", null);
 __decorate([
     (0, roles_guard_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, common_1.Post)('register/email'),
     (0, swagger_1.ApiOperation)({ summary: 'Register with email and password' }),
     (0, swagger_1.ApiBody)({ type: RegisterEmailDto }),
@@ -359,6 +363,7 @@ __decorate([
 ], AuthController.prototype, "registerWithEmail", null);
 __decorate([
     (0, roles_guard_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, common_1.Post)('login/phone'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Login with phone verification code' }),
@@ -373,6 +378,7 @@ __decorate([
 ], AuthController.prototype, "loginWithPhone", null);
 __decorate([
     (0, roles_guard_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     (0, common_1.Post)('login/email'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Login with email and password' }),
@@ -414,6 +420,7 @@ __decorate([
 ], AuthController.prototype, "refreshToken", null);
 __decorate([
     (0, roles_guard_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { limit: 5, ttl: 60000 } }),
     (0, common_1.Post)('forgot-password'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Request password reset' }),
@@ -438,6 +445,7 @@ __decorate([
 ], AuthController.prototype, "validateResetToken", null);
 __decorate([
     (0, roles_guard_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { limit: 5, ttl: 60000 } }),
     (0, common_1.Post)('reset-password'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Reset password with token' }),

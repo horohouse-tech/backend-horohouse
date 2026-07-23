@@ -16,6 +16,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nes
 import { IsString, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
+import { Throttle } from '@nestjs/throttler';
 import { 
   AuthService, 
   AuthTokens,
@@ -141,6 +142,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('send-phone-code')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send phone verification code' })
@@ -152,6 +154,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('register/phone')
   @ApiOperation({ summary: 'Register with phone number' })
   @ApiBody({ type: RegisterPhoneDto })
@@ -166,6 +169,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('register/email')
   @ApiOperation({ summary: 'Register with email and password' })
   @ApiBody({ type: RegisterEmailDto })
@@ -180,6 +184,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('login/phone')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with phone verification code' })
@@ -194,6 +199,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('login/email')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
@@ -234,6 +240,7 @@ export class AuthController {
 
 
 @Public()
+@Throttle({ default: { limit: 5, ttl: 60000 } })
 @Post('forgot-password')
 @HttpCode(HttpStatus.OK)
 @ApiOperation({ summary: 'Request password reset' })
@@ -254,6 +261,7 @@ async validateResetToken(@Body() dto: ValidateResetTokenDto) {
 }
 
 @Public()
+@Throttle({ default: { limit: 5, ttl: 60000 } })
 @Post('reset-password')
 @HttpCode(HttpStatus.OK)
 @ApiOperation({ summary: 'Reset password with token' })
