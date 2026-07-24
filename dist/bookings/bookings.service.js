@@ -22,7 +22,7 @@ const property_schema_1 = require("../properties/schemas/property.schema");
 const user_schema_1 = require("../users/schemas/user.schema");
 const rooms_service_1 = require("../rooms/rooms.service");
 const notifications_service_1 = require("../notifications/notifications.service");
-const SERVICE_FEE_RATE = 0.10;
+const SERVICE_FEE_RATE = 0;
 const AUTO_CANCEL_HOURS = 24;
 let BookingsService = BookingsService_1 = class BookingsService {
     bookingModel;

@@ -25,8 +25,12 @@ import { HostStatsDto } from './dto/host-stats.dto';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-/** Platform service fee percentage (e.g. 0.10 = 10%) */
-const SERVICE_FEE_RATE = 0.10;
+/**
+ * Guest-facing service fee rate.
+ * Set to 0 — the platform commission is deducted from the HOST payout,
+ * not added on top of the guest's payment (host-only commission model).
+ */
+const SERVICE_FEE_RATE = 0;
 
 /** How many hours after creation an unpaid PENDING booking is auto-cancelled */
 const AUTO_CANCEL_HOURS = 24;

@@ -18,8 +18,8 @@ import { IsString, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 import { Throttle } from '@nestjs/throttler';
-import { 
-  AuthService, 
+import {
+  AuthService,
   AuthTokens,
   RegisterWithPhoneDto,
   RegisterWithEmailDto,
@@ -132,7 +132,7 @@ declare module 'fastify' {
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   private setAuthCookies(res: FastifyReply, tokens: AuthTokens) {
     const isProd = process.env.NODE_ENV === 'production';
@@ -182,7 +182,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'User already exists' })
   async registerWithPhone(
-    @Body() dto: RegisterWithPhoneDto, 
+    @Body() dto: RegisterWithPhoneDto,
     @Req() req: FastifyRequest,
     @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
@@ -200,7 +200,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'User already exists' })
   async registerWithEmail(
-    @Body() dto: RegisterWithEmailDto, 
+    @Body() dto: RegisterWithEmailDto,
     @Req() req: FastifyRequest,
     @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
@@ -218,7 +218,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async loginWithPhone(
-    @Body() dto: LoginWithPhoneDto, 
+    @Body() dto: LoginWithPhoneDto,
     @Req() req: FastifyRequest,
     @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
@@ -236,7 +236,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async loginWithEmail(
-    @Body() dto: LoginWithEmailDto, 
+    @Body() dto: LoginWithEmailDto,
     @Req() req: FastifyRequest,
     @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
@@ -264,7 +264,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshToken(
-    @Body() body: Partial<RefreshTokenDto>, 
+    @Body() body: Partial<RefreshTokenDto>,
     @Req() req: FastifyRequest & { cookies?: Record<string, string> },
     @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<AuthTokens> {
@@ -278,94 +278,94 @@ export class AuthController {
   }
 
 
-@Public()
-@Throttle({ default: { limit: 5, ttl: 60000 } })
-@Post('forgot-password')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({ summary: 'Request password reset' })
-@ApiBody({ type: ForgotPasswordDto })
-@ApiResponse({ status: 200, description: 'Password reset email sent if account exists' })
-async forgotPassword(@Body() dto: ForgotPasswordDto) {
-  return this.authService.requestPasswordReset(dto.email);
-}
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ status: 200, description: 'Password reset email sent if account exists' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.requestPasswordReset(dto.email);
+  }
 
-@Public()
-@Post('validate-reset-token')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({ summary: 'Validate password reset token' })
-@ApiBody({ type: ValidateResetTokenDto })
-@ApiResponse({ status: 200, description: 'Token validation result' })
-async validateResetToken(@Body() dto: ValidateResetTokenDto) {
-  return this.authService.validateResetToken(dto.token);
-}
+  @Public()
+  @Post('validate-reset-token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Validate password reset token' })
+  @ApiBody({ type: ValidateResetTokenDto })
+  @ApiResponse({ status: 200, description: 'Token validation result' })
+  async validateResetToken(@Body() dto: ValidateResetTokenDto) {
+    return this.authService.validateResetToken(dto.token);
+  }
 
-@Public()
-@Throttle({ default: { limit: 5, ttl: 60000 } })
-@Post('reset-password')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({ summary: 'Reset password with token' })
-@ApiBody({ type: ResetPasswordDto })
-@ApiResponse({ status: 200, description: 'Password reset successfully' })
-@ApiResponse({ status: 401, description: 'Invalid or expired token' })
-async resetPassword(@Body() dto: ResetPasswordDto) {
-  return this.authService.resetPassword(dto.token, dto.newPassword);
-}
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password with token' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired token' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
+  }
 
   // 🔥 FIX: Manually handle redirect for Fastify compatibility
- // Remove @Res() injection and let NestJS handle the response
-@Public()
-@Get('google')
-@UseGuards(GoogleOAuthGuard)  // Changed from AuthGuard('google')
-@ApiOperation({ summary: 'Initiate Google OAuth login' })
-async googleAuth() {
-  // Guard handles the redirect to Google
-}
-
-@Public()
-@Get('google/callback')
-@UseGuards(GoogleOAuthGuard)
-@ApiOperation({ summary: 'Google OAuth callback' })
-async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-  const googleUser = req.user as any;
-  const state = (req.query as any)?.state;
-
-  try {
-    const authResult = await this.authService.googleAuth({
-      googleId: googleUser.id,
-      email: googleUser.email,
-      name: googleUser.displayName,
-      picture: googleUser.picture,
-    }, req);
-
-    this.setAuthCookies(res, authResult);
-
-    let redirectUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    
-    // If state contains deep link (e.g., exp://... or horohouse://...), use it
-    if (state && (state.startsWith('exp://') || state.startsWith('horohouse://') || state.startsWith('http'))) {
-      const separator = state.includes('?') ? '&' : '?';
-      redirectUrl = `${state}${separator}token=${authResult.accessToken}&refresh=${authResult.refreshToken}`;
-    } else {
-      redirectUrl = `${redirectUrl}/auth/callback?token=${authResult.accessToken}&refresh=${authResult.refreshToken}`;
-    }
-
-    // ✅ Fastify redirect signature: redirect(url, statusCode?)
-    res.redirect(redirectUrl, 302);
-    return res;
-  } catch (error) {
-    let errorUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    if (state && (state.startsWith('exp://') || state.startsWith('horohouse://') || state.startsWith('http'))) {
-      const separator = state.includes('?') ? '&' : '?';
-      errorUrl = `${state}${separator}error=oauth_failed`;
-    } else {
-      errorUrl = `${errorUrl}/auth/login?error=oauth_failed`;
-    }
-    
-    res.redirect(errorUrl, 302);
-    return res;
+  // Remove @Res() injection and let NestJS handle the response
+  @Public()
+  @Get('google')
+  @UseGuards(GoogleOAuthGuard)  // Changed from AuthGuard('google')
+  @ApiOperation({ summary: 'Initiate Google OAuth login' })
+  async googleAuth() {
+    // Guard handles the redirect to Google
   }
-}
-  
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleOAuthGuard)
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const googleUser = req.user as any;
+    const state = (req.query as any)?.state;
+
+    try {
+      const authResult = await this.authService.googleAuth({
+        googleId: googleUser.id,
+        email: googleUser.email,
+        name: googleUser.displayName,
+        picture: googleUser.picture,
+      }, req);
+
+      this.setAuthCookies(res, authResult);
+
+      let redirectUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+      // If state contains deep link (e.g., exp://... or horohouse://...), use it
+      if (state && (state.startsWith('exp://') || state.startsWith('horohouse://') || state.startsWith('http'))) {
+        const separator = state.includes('?') ? '&' : '?';
+        redirectUrl = `${state}${separator}token=${authResult.accessToken}&refresh=${authResult.refreshToken}`;
+      } else {
+        redirectUrl = `${redirectUrl}/auth/callback?token=${authResult.accessToken}&refresh=${authResult.refreshToken}`;
+      }
+
+      // ✅ Fastify redirect signature: redirect(url, statusCode?)
+      res.redirect(redirectUrl, 302);
+      return res;
+    } catch (error) {
+      let errorUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      if (state && (state.startsWith('exp://') || state.startsWith('horohouse://') || state.startsWith('http'))) {
+        const separator = state.includes('?') ? '&' : '?';
+        errorUrl = `${state}${separator}error=oauth_failed`;
+      } else {
+        errorUrl = `${errorUrl}/auth/login?error=oauth_failed`;
+      }
+
+      res.redirect(errorUrl, 302);
+      return res;
+    }
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @ApiBearerAuth()
@@ -412,7 +412,7 @@ async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
       }
 
       let userId: string;
-      
+
       if (req.user._id) {
         userId = req.user._id.toString();
       } else if ((req.user as any).id) {
@@ -422,7 +422,7 @@ async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
       } else {
         throw new Error('User ID not found!');
       }
-     
+
       return {
         valid: true,
         user: {
@@ -482,13 +482,13 @@ async googleAuthRedirect(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
   @ApiResponse({ status: 200, description: 'Sessions retrieved successfully' })
   async getSessions(@Req() req: FastifyRequest & { user: User }) {
     const sessions = await this.authService.getUserSessions(req.user);
-    
+
     const currentSessionId = (req.user as any).sessionId;
     const sessionsWithCurrent = sessions.map(session => ({
       ...session,
       current: session.id === currentSessionId
     }));
-    
+
     return { sessions: sessionsWithCurrent };
   }
 
