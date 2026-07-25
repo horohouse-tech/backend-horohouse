@@ -245,6 +245,7 @@ export class BookingsService {
   /**
    * Guest cancels their own booking.
    * Applies refund logic based on the property's cancellation policy.
+   * Notifies both guest and host via in-app + push after cancellation.
    */
   async cancelBooking(
     bookingId: string,
@@ -296,6 +297,34 @@ export class BookingsService {
       .exec();
 
     this.logger.log(`Booking ${bookingId} cancelled by ${cancelledBy}`);
+
+    // ── Notify both parties (in-app + push) ────────────────────────────────
+    try {
+      const [property, guest, host] = await Promise.all([
+        this.propertyModel.findById(booking.propertyId).select('title').lean(),
+        this.userModel.findById(booking.guestId).select('name').lean(),
+        this.userModel.findById(booking.hostId).select('name').lean(),
+      ]);
+      const fmt = (d: Date) => new Date(d).toISOString().split('T')[0];
+
+      await this.notificationsService.notifyBookingCancelled({
+        guestId:        booking.guestId.toString(),
+        hostId:         booking.hostId.toString(),
+        bookingId,
+        propertyId:     booking.propertyId.toString(),
+        propertyTitle:  (property as any)?.title ?? 'the property',
+        guestName:      (guest as any)?.name ?? 'Guest',
+        hostName:       (host as any)?.name ?? 'Host',
+        checkIn:        fmt(booking.checkIn),
+        checkOut:       fmt(booking.checkOut),
+        cancelledByGuest: cancelledBy === CancelledBy.GUEST,
+        refundAmount:   refundAmount > 0 ? refundAmount : undefined,
+        currency:       booking.currency,
+      });
+    } catch (notifErr: any) {
+      // Non-fatal: the cancellation already succeeded
+      this.logger.warn(`cancelBooking: notification failed for ${bookingId}: ${notifErr.message}`);
+    }
     return updated!;
   }
 

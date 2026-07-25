@@ -4,9 +4,11 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model } from 'mongoose';
 
 import { Booking, BookingDocument, BookingStatus, PaymentStatus, CancelledBy } from './schema/booking.schema';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/schemas/notification.schema';
 
 /** Hours after creation that an unpaid PENDING booking is auto-cancelled */
-const AUTO_CANCEL_HOURS = 24;
+const AUTO_CANCEL_HOURS = 12;
 
 /** Hours after check-in time with no actualCheckIn before marking NO_SHOW */
 const NO_SHOW_GRACE_HOURS = 24;
@@ -17,6 +19,7 @@ export class BookingsScheduler {
 
     constructor(
         @InjectModel(Booking.name) private bookingModel: Model<BookingDocument>,
+        private readonly notificationsService: NotificationsService,
     ) { }
 
     // ════════════════════════════════════════════════════════════════════════════
@@ -26,36 +29,86 @@ export class BookingsScheduler {
     /**
      * Every hour: find PENDING bookings that have been waiting more than
      * AUTO_CANCEL_HOURS without payment and cancel them automatically.
-     * This frees up the calendar for other guests.
+     * Frees up the calendar for other guests and notifies each guest
+     * via in-app + push notification.
      */
     @Cron(CronExpression.EVERY_HOUR)
     async autoCancelUnpaidBookings(): Promise<void> {
         const cutoff = new Date(Date.now() - AUTO_CANCEL_HOURS * 3_600_000);
 
         try {
-           const result = await this.bookingModel.updateMany(
-    {
-        status: BookingStatus.PENDING,
-        paymentStatus: PaymentStatus.UNPAID,
-        createdAt: { $lt: cutoff },
-    },
-    {
-        $set: {
-            status: BookingStatus.CANCELLED,
-            cancellation: {
-                cancelledBy: CancelledBy.SYSTEM,
-                cancelledAt: new Date(),
-                reason: `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`,
-                refundAmount: 0,
-            },
-        },
-    },
-);
+            // Fetch individually (not updateMany) so we can notify each guest
+            const expiredBookings = await this.bookingModel
+                .find({
+                    status: BookingStatus.PENDING,
+                    paymentStatus: PaymentStatus.UNPAID,
+                    createdAt: { $lt: cutoff },
+                })
+                .populate('propertyId', 'title')
+                .lean()
+                .exec();
 
-            if (result.modifiedCount > 0) {
+            if (expiredBookings.length === 0) return;
+
+            let cancelledCount = 0;
+
+            for (const booking of expiredBookings) {
+                try {
+                    const reason = `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`;
+
+                    // ── 1. Mark booking as CANCELLED ─────────────────────────────
+                    await this.bookingModel.findByIdAndUpdate(booking._id, {
+                        $set: {
+                            status: BookingStatus.CANCELLED,
+                            cancellation: {
+                                cancelledBy: CancelledBy.SYSTEM,
+                                cancelledAt: new Date(),
+                                reason,
+                                refundAmount: 0,
+                            },
+                        },
+                    });
+
+                    // Once status = CANCELLED, assertDatesAvailable() will no longer
+                    // include this booking — the dates are immediately free again.
+
+                    // ── 2. Notify the guest (in-app + push) ──────────────────────
+                    const propertyTitle = (booking.propertyId as any)?.title ?? 'the property';
+                    const fmt = (d: Date) => new Date(d).toISOString().split('T')[0];
+                    const checkIn  = fmt(booking.checkIn);
+                    const checkOut = fmt(booking.checkOut);
+
+                    await this.notificationsService.create({
+                        userId: booking.guestId.toString(),
+                        type:   NotificationType.BOOKING_CANCELLED,
+                        title:  'Booking cancelled — payment timeout ⏰',
+                        message:
+                            `Your reservation at ${propertyTitle} ` +
+                            `(${checkIn} → ${checkOut}) was automatically cancelled ` +
+                            `because payment was not completed within ${AUTO_CANCEL_HOURS} hours. ` +
+                            `The dates are now available for other guests.`,
+                        link: `/bookings/${booking._id.toString()}`,
+                        metadata: {
+                            bookingId:     booking._id.toString(),
+                            propertyId:    (booking.propertyId as any)?._id?.toString() ?? booking.propertyId?.toString(),
+                            propertyTitle,
+                            checkIn,
+                            checkOut,
+                        },
+                    });
+
+                    cancelledCount++;
+                } catch (bookingErr: any) {
+                    this.logger.warn(
+                        `Auto-cancel: failed to process booking ${booking._id}: ${bookingErr.message}`,
+                    );
+                }
+            }
+
+            if (cancelledCount > 0) {
                 this.logger.log(
-                    `Auto-cancel job: cancelled ${result.modifiedCount} unpaid booking(s) ` +
-                    `(older than ${AUTO_CANCEL_HOURS}h)`,
+                    `Auto-cancel job: cancelled ${cancelledCount} unpaid booking(s) ` +
+                    `(older than ${AUTO_CANCEL_HOURS}h) and notified guest(s)`,
                 );
             }
         } catch (err: any) {
@@ -77,24 +130,24 @@ export class BookingsScheduler {
         const graceCutoff = new Date(Date.now() - NO_SHOW_GRACE_HOURS * 3_600_000);
 
         try {
-           const result = await this.bookingModel.updateMany(
-    {
-        status: BookingStatus.CONFIRMED,
-        actualCheckIn: { $exists: false },
-        checkIn: { $lt: graceCutoff },
-    },
-    {
-        $set: {
-            status: BookingStatus.NO_SHOW,
-            cancellation: {
-                cancelledBy: CancelledBy.SYSTEM,
-                cancelledAt: new Date(),
-                reason: 'Guest did not check in within grace period',
-                refundAmount: 0,
-            },
-        },
-    },
-);
+            const result = await this.bookingModel.updateMany(
+                {
+                    status: BookingStatus.CONFIRMED,
+                    actualCheckIn: { $exists: false },
+                    checkIn: { $lt: graceCutoff },
+                },
+                {
+                    $set: {
+                        status: BookingStatus.NO_SHOW,
+                        cancellation: {
+                            cancelledBy: CancelledBy.SYSTEM,
+                            cancelledAt: new Date(),
+                            reason: 'Guest did not check in within grace period',
+                            refundAmount: 0,
+                        },
+                    },
+                },
+            );
 
             if (result.modifiedCount > 0) {
                 this.logger.log(

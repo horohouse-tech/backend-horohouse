@@ -19,35 +19,77 @@ const mongoose_1 = require("@nestjs/mongoose");
 const schedule_1 = require("@nestjs/schedule");
 const mongoose_2 = require("mongoose");
 const booking_schema_1 = require("./schema/booking.schema");
-const AUTO_CANCEL_HOURS = 24;
+const notifications_service_1 = require("../notifications/notifications.service");
+const notification_schema_1 = require("../notifications/schemas/notification.schema");
+const AUTO_CANCEL_HOURS = 12;
 const NO_SHOW_GRACE_HOURS = 24;
 let BookingsScheduler = BookingsScheduler_1 = class BookingsScheduler {
     bookingModel;
+    notificationsService;
     logger = new common_1.Logger(BookingsScheduler_1.name);
-    constructor(bookingModel) {
+    constructor(bookingModel, notificationsService) {
         this.bookingModel = bookingModel;
+        this.notificationsService = notificationsService;
     }
     async autoCancelUnpaidBookings() {
         const cutoff = new Date(Date.now() - AUTO_CANCEL_HOURS * 3_600_000);
         try {
-            const result = await this.bookingModel.updateMany({
+            const expiredBookings = await this.bookingModel
+                .find({
                 status: booking_schema_1.BookingStatus.PENDING,
                 paymentStatus: booking_schema_1.PaymentStatus.UNPAID,
                 createdAt: { $lt: cutoff },
-            }, {
-                $set: {
-                    status: booking_schema_1.BookingStatus.CANCELLED,
-                    cancellation: {
-                        cancelledBy: booking_schema_1.CancelledBy.SYSTEM,
-                        cancelledAt: new Date(),
-                        reason: `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`,
-                        refundAmount: 0,
-                    },
-                },
-            });
-            if (result.modifiedCount > 0) {
-                this.logger.log(`Auto-cancel job: cancelled ${result.modifiedCount} unpaid booking(s) ` +
-                    `(older than ${AUTO_CANCEL_HOURS}h)`);
+            })
+                .populate('propertyId', 'title')
+                .lean()
+                .exec();
+            if (expiredBookings.length === 0)
+                return;
+            let cancelledCount = 0;
+            for (const booking of expiredBookings) {
+                try {
+                    const reason = `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`;
+                    await this.bookingModel.findByIdAndUpdate(booking._id, {
+                        $set: {
+                            status: booking_schema_1.BookingStatus.CANCELLED,
+                            cancellation: {
+                                cancelledBy: booking_schema_1.CancelledBy.SYSTEM,
+                                cancelledAt: new Date(),
+                                reason,
+                                refundAmount: 0,
+                            },
+                        },
+                    });
+                    const propertyTitle = booking.propertyId?.title ?? 'the property';
+                    const fmt = (d) => new Date(d).toISOString().split('T')[0];
+                    const checkIn = fmt(booking.checkIn);
+                    const checkOut = fmt(booking.checkOut);
+                    await this.notificationsService.create({
+                        userId: booking.guestId.toString(),
+                        type: notification_schema_1.NotificationType.BOOKING_CANCELLED,
+                        title: 'Booking cancelled — payment timeout ⏰',
+                        message: `Your reservation at ${propertyTitle} ` +
+                            `(${checkIn} → ${checkOut}) was automatically cancelled ` +
+                            `because payment was not completed within ${AUTO_CANCEL_HOURS} hours. ` +
+                            `The dates are now available for other guests.`,
+                        link: `/bookings/${booking._id.toString()}`,
+                        metadata: {
+                            bookingId: booking._id.toString(),
+                            propertyId: booking.propertyId?._id?.toString() ?? booking.propertyId?.toString(),
+                            propertyTitle,
+                            checkIn,
+                            checkOut,
+                        },
+                    });
+                    cancelledCount++;
+                }
+                catch (bookingErr) {
+                    this.logger.warn(`Auto-cancel: failed to process booking ${booking._id}: ${bookingErr.message}`);
+                }
+            }
+            if (cancelledCount > 0) {
+                this.logger.log(`Auto-cancel job: cancelled ${cancelledCount} unpaid booking(s) ` +
+                    `(older than ${AUTO_CANCEL_HOURS}h) and notified guest(s)`);
             }
         }
         catch (err) {
@@ -97,6 +139,7 @@ __decorate([
 exports.BookingsScheduler = BookingsScheduler = BookingsScheduler_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(booking_schema_1.Booking.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        notifications_service_1.NotificationsService])
 ], BookingsScheduler);
 //# sourceMappingURL=bookings.scheduler.js.map

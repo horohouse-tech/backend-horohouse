@@ -183,6 +183,31 @@ let BookingsService = BookingsService_1 = class BookingsService {
         }, { new: true })
             .exec();
         this.logger.log(`Booking ${bookingId} cancelled by ${cancelledBy}`);
+        try {
+            const [property, guest, host] = await Promise.all([
+                this.propertyModel.findById(booking.propertyId).select('title').lean(),
+                this.userModel.findById(booking.guestId).select('name').lean(),
+                this.userModel.findById(booking.hostId).select('name').lean(),
+            ]);
+            const fmt = (d) => new Date(d).toISOString().split('T')[0];
+            await this.notificationsService.notifyBookingCancelled({
+                guestId: booking.guestId.toString(),
+                hostId: booking.hostId.toString(),
+                bookingId,
+                propertyId: booking.propertyId.toString(),
+                propertyTitle: property?.title ?? 'the property',
+                guestName: guest?.name ?? 'Guest',
+                hostName: host?.name ?? 'Host',
+                checkIn: fmt(booking.checkIn),
+                checkOut: fmt(booking.checkOut),
+                cancelledByGuest: cancelledBy === booking_schema_1.CancelledBy.GUEST,
+                refundAmount: refundAmount > 0 ? refundAmount : undefined,
+                currency: booking.currency,
+            });
+        }
+        catch (notifErr) {
+            this.logger.warn(`cancelBooking: notification failed for ${bookingId}: ${notifErr.message}`);
+        }
         return updated;
     }
     async getGuestBookings(guestId, query) {
