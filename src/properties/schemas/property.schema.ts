@@ -124,7 +124,7 @@ export interface PropertyAmenities {
 
 export interface ShortTermAmenities {
   hasWifi?: boolean;
-  hasBreakfast?: boolean;
+  hasBreakfast?: boolean;   // Hotel: breakfast included
   hasParking?: boolean;
   hasTv?: boolean;
   hasKitchen?: boolean;
