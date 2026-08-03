@@ -8,7 +8,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 
 /** Hours after creation that an unpaid PENDING booking is auto-cancelled */
-const AUTO_CANCEL_HOURS = 12;
+const AUTO_CANCEL_HOURS = 24;
 
 /** Hours after check-in time with no actualCheckIn before marking NO_SHOW */
 const NO_SHOW_GRACE_HOURS = 24;
@@ -40,9 +40,13 @@ export class BookingsScheduler {
             // Fetch individually (not updateMany) so we can notify each guest
             const expiredBookings = await this.bookingModel
                 .find({
-                    status: BookingStatus.PENDING,
                     paymentStatus: PaymentStatus.UNPAID,
-                    createdAt: { $lt: cutoff },
+                    $or: [
+                        // Instant-book or awaiting host response — never paid, created too long ago
+                        { status: BookingStatus.PENDING, createdAt: { $lt: cutoff } },
+                        // Host confirmed, but guest never paid within the window
+                        { status: BookingStatus.CONFIRMED, confirmedAt: { $lt: cutoff } },
+                    ],
                 })
                 .populate('propertyId', 'title')
                 .lean()
@@ -54,7 +58,10 @@ export class BookingsScheduler {
 
             for (const booking of expiredBookings) {
                 try {
-                    const reason = `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`;
+                    const wasConfirmed = booking.status === BookingStatus.CONFIRMED;
+                    const reason = wasConfirmed
+                        ? `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours of host confirmation`
+                        : `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`;
 
                     // ── 1. Mark booking as CANCELLED ─────────────────────────────
                     await this.bookingModel.findByIdAndUpdate(booking._id, {

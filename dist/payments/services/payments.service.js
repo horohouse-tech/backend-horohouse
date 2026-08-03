@@ -455,6 +455,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             paymentMethod: transaction.paymentMethod,
             paidAt: transaction.completedAt ?? new Date(),
         };
+        update.expiresAt = undefined;
         const isInstantBookable = booking.propertyId?.isInstantBookable ?? false;
         if (isInstantBookable && booking.status === booking_schema_1.BookingStatus.PENDING) {
             update.status = booking_schema_1.BookingStatus.CONFIRMED;

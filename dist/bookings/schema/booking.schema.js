@@ -63,6 +63,7 @@ let Booking = class Booking {
     hostNote;
     isInstantBook;
     confirmedAt;
+    expiresAt;
     cancellation;
     actualCheckIn;
     actualCheckOut;
@@ -177,6 +178,10 @@ __decorate([
     __metadata("design:type", Date)
 ], Booking.prototype, "confirmedAt", void 0);
 __decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Date)
+], Booking.prototype, "expiresAt", void 0);
+__decorate([
     (0, mongoose_1.Prop)({
         type: {
             cancelledBy: { type: String, enum: Object.values(CancelledBy) },
@@ -214,4 +219,5 @@ exports.BookingSchema.index({ roomId: 1, status: 1, checkIn: 1, checkOut: 1 });
 exports.BookingSchema.index({ guestId: 1, status: 1, createdAt: -1 });
 exports.BookingSchema.index({ hostId: 1, status: 1, createdAt: -1 });
 exports.BookingSchema.index({ status: 1, paymentStatus: 1, createdAt: 1 });
+exports.BookingSchema.index({ status: 1, expiresAt: 1 });
 //# sourceMappingURL=booking.schema.js.map

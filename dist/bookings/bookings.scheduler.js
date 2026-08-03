@@ -21,7 +21,7 @@ const mongoose_2 = require("mongoose");
 const booking_schema_1 = require("./schema/booking.schema");
 const notifications_service_1 = require("../notifications/notifications.service");
 const notification_schema_1 = require("../notifications/schemas/notification.schema");
-const AUTO_CANCEL_HOURS = 12;
+const AUTO_CANCEL_HOURS = 24;
 const NO_SHOW_GRACE_HOURS = 24;
 let BookingsScheduler = BookingsScheduler_1 = class BookingsScheduler {
     bookingModel;
@@ -36,9 +36,11 @@ let BookingsScheduler = BookingsScheduler_1 = class BookingsScheduler {
         try {
             const expiredBookings = await this.bookingModel
                 .find({
-                status: booking_schema_1.BookingStatus.PENDING,
                 paymentStatus: booking_schema_1.PaymentStatus.UNPAID,
-                createdAt: { $lt: cutoff },
+                $or: [
+                    { status: booking_schema_1.BookingStatus.PENDING, createdAt: { $lt: cutoff } },
+                    { status: booking_schema_1.BookingStatus.CONFIRMED, confirmedAt: { $lt: cutoff } },
+                ],
             })
                 .populate('propertyId', 'title')
                 .lean()
@@ -48,7 +50,10 @@ let BookingsScheduler = BookingsScheduler_1 = class BookingsScheduler {
             let cancelledCount = 0;
             for (const booking of expiredBookings) {
                 try {
-                    const reason = `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`;
+                    const wasConfirmed = booking.status === booking_schema_1.BookingStatus.CONFIRMED;
+                    const reason = wasConfirmed
+                        ? `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours of host confirmation`
+                        : `Automatically cancelled: payment not received within ${AUTO_CANCEL_HOURS} hours`;
                     await this.bookingModel.findByIdAndUpdate(booking._id, {
                         $set: {
                             status: booking_schema_1.BookingStatus.CANCELLED,

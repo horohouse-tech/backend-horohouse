@@ -103,8 +103,11 @@ let BookingsService = BookingsService_1 = class BookingsService {
             ? rawHostRef._id.toString()
             : rawHostRef?.toString();
         const isInstantBook = !!property.isInstantBookable;
-        const initialStatus = isInstantBook ? booking_schema_1.BookingStatus.CONFIRMED : booking_schema_1.BookingStatus.PENDING;
-        const confirmedAt = isInstantBook ? new Date() : undefined;
+        const initialStatus = booking_schema_1.BookingStatus.PENDING;
+        const confirmedAt = undefined;
+        const expiresAt = isInstantBook
+            ? new Date(Date.now() + 30 * 60 * 1000)
+            : new Date(Date.now() + 48 * 60 * 60 * 1000);
         const booking = new this.bookingModel({
             propertyId: new mongoose_2.Types.ObjectId(dto.propertyId),
             ...(dto.roomId ? { roomId: new mongoose_2.Types.ObjectId(dto.roomId) } : {}),
@@ -220,11 +223,13 @@ let BookingsService = BookingsService_1 = class BookingsService {
             throw new common_1.BadRequestException(`Only PENDING bookings can be confirmed. Current status: ${booking.status}`);
         }
         await this.assertDatesAvailable(booking.propertyId.toString(), booking.checkIn, booking.checkOut, bookingId);
+        const paymentDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
         const updated = await this.bookingModel
             .findByIdAndUpdate(bookingId, {
             status: booking_schema_1.BookingStatus.CONFIRMED,
             confirmedAt: new Date(),
             hostNote: dto.hostNote,
+            expiresAt: paymentDeadline,
         }, { new: true })
             .exec();
         const property = await this.propertyModel.findById(booking.propertyId).select('title').lean();
@@ -299,7 +304,8 @@ let BookingsService = BookingsService_1 = class BookingsService {
         const [bookingStats, propertyStats] = await Promise.all([
             this.bookingModel.aggregate([
                 { $match: { hostId: hostObjectId } },
-                { $facet: {
+                {
+                    $facet: {
                         completedStays: [
                             { $match: { status: { $in: ['completed', 'checked_out'] } } },
                             { $count: 'total' },
@@ -323,7 +329,8 @@ let BookingsService = BookingsService_1 = class BookingsService {
                             },
                             { $group: { _id: '$propertyId' } },
                         ],
-                    } },
+                    }
+                },
             ]),
             this.propertyModel.aggregate([
                 { $match: { ownerId: hostObjectId, isActive: true } },

@@ -575,6 +575,9 @@ async reconcileTransaction(transaction: TransactionDocument): Promise<'success' 
       paidAt: transaction.completedAt ?? new Date(),
     };
 
+    // Paid, so no more expiration
+    update.expiresAt = undefined;
+
     const isInstantBookable = (booking.propertyId as any)?.isInstantBookable ?? false;
     if (isInstantBookable && booking.status === BookingStatus.PENDING) {
       update.status = BookingStatus.CONFIRMED;

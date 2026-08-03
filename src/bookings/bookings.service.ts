@@ -183,10 +183,16 @@ export class BookingsService {
       ? (rawHostRef as any)._id.toString()
       : rawHostRef?.toString();
 
-    // ── 7. Instant book? ─────────────────────────────────────────────────────
+    // ── 7. Instant book? Payment required before confirmation either way ────
     const isInstantBook = !!(property as any).isInstantBookable;
-    const initialStatus = isInstantBook ? BookingStatus.CONFIRMED : BookingStatus.PENDING;
-    const confirmedAt = isInstantBook ? new Date() : undefined;
+    const initialStatus = BookingStatus.PENDING;
+    const confirmedAt = undefined;
+
+    // Instant-book: guest must pay within 30 min or the slot releases.
+    // Non-instant: host must respond within 48h or the request expires.
+    const expiresAt = isInstantBook
+      ? new Date(Date.now() + 30 * 60 * 1000)
+      : new Date(Date.now() + 48 * 60 * 60 * 1000);
 
     // ── 8. Persist ───────────────────────────────────────────────────────────
     const booking = new this.bookingModel({
@@ -239,7 +245,7 @@ export class BookingsService {
       });
     }
 
-    return saved; 
+    return saved;
   }
 
   /**
@@ -308,18 +314,18 @@ export class BookingsService {
       const fmt = (d: Date) => new Date(d).toISOString().split('T')[0];
 
       await this.notificationsService.notifyBookingCancelled({
-        guestId:        booking.guestId.toString(),
-        hostId:         booking.hostId.toString(),
+        guestId: booking.guestId.toString(),
+        hostId: booking.hostId.toString(),
         bookingId,
-        propertyId:     booking.propertyId.toString(),
-        propertyTitle:  (property as any)?.title ?? 'the property',
-        guestName:      (guest as any)?.name ?? 'Guest',
-        hostName:       (host as any)?.name ?? 'Host',
-        checkIn:        fmt(booking.checkIn),
-        checkOut:       fmt(booking.checkOut),
+        propertyId: booking.propertyId.toString(),
+        propertyTitle: (property as any)?.title ?? 'the property',
+        guestName: (guest as any)?.name ?? 'Guest',
+        hostName: (host as any)?.name ?? 'Host',
+        checkIn: fmt(booking.checkIn),
+        checkOut: fmt(booking.checkOut),
         cancelledByGuest: cancelledBy === CancelledBy.GUEST,
-        refundAmount:   refundAmount > 0 ? refundAmount : undefined,
-        currency:       booking.currency,
+        refundAmount: refundAmount > 0 ? refundAmount : undefined,
+        currency: booking.currency,
       });
     } catch (notifErr: any) {
       // Non-fatal: the cancellation already succeeded
@@ -360,6 +366,9 @@ export class BookingsService {
       bookingId, // exclude the current booking itself
     );
 
+    // Guest now has 24h to pay, or the confirmed slot auto-releases
+    const paymentDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     const updated = await this.bookingModel
       .findByIdAndUpdate(
         bookingId,
@@ -367,6 +376,7 @@ export class BookingsService {
           status: BookingStatus.CONFIRMED,
           confirmedAt: new Date(),
           hostNote: dto.hostNote,
+          expiresAt: paymentDeadline,
         },
         { new: true },
       )
@@ -472,79 +482,81 @@ export class BookingsService {
   }
 
 
-async getHostStats(hostId: string): Promise<HostStatsDto> {
-  const hostObjectId = new Types.ObjectId(hostId);
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  async getHostStats(hostId: string): Promise<HostStatsDto> {
+    const hostObjectId = new Types.ObjectId(hostId);
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [bookingStats, propertyStats] = await Promise.all([
+    const [bookingStats, propertyStats] = await Promise.all([
 
-    this.bookingModel.aggregate([
-      { $match: { hostId: hostObjectId } },
-      { $facet: {
+      this.bookingModel.aggregate([
+        { $match: { hostId: hostObjectId } },
+        {
+          $facet: {
 
-        completedStays: [
-          { $match: { status: { $in: ['completed', 'checked_out'] } } },
-          { $count: 'total' },
-        ],
+            completedStays: [
+              { $match: { status: { $in: ['completed', 'checked_out'] } } },
+              { $count: 'total' },
+            ],
 
-        currentMonthEarnings: [
-          {
-            $match: {
-              status: { $in: ['confirmed', 'completed', 'checked_out'] },
-              checkIn: { $gte: monthStart },
-            },
-          },
-          { $group: { _id: null, total: { $sum: '$priceBreakdown.totalAmount' } } },
-        ],
+            currentMonthEarnings: [
+              {
+                $match: {
+                  status: { $in: ['confirmed', 'completed', 'checked_out'] },
+                  checkIn: { $gte: monthStart },
+                },
+              },
+              { $group: { _id: null, total: { $sum: '$priceBreakdown.totalAmount' } } },
+            ],
 
-        occupiedPropertyIds: [
-          {
-            $match: {
-              status: { $in: ['confirmed', 'checked_in'] },
-              checkIn: { $lte: now },
-              checkOut: { $gte: now },
-            },
-          },
-          { $group: { _id: '$propertyId' } },
-        ],
-      }},
-    ]),
+            occupiedPropertyIds: [
+              {
+                $match: {
+                  status: { $in: ['confirmed', 'checked_in'] },
+                  checkIn: { $lte: now },
+                  checkOut: { $gte: now },
+                },
+              },
+              { $group: { _id: '$propertyId' } },
+            ],
+          }
+        },
+      ]),
 
-    this.propertyModel.aggregate([
-      { $match: { ownerId: hostObjectId, isActive: true } },
-      {
-        $group: {
-          _id: null,
-          totalListings: { $sum: 1 },
-          avgRating: {
-            $avg: {
-              $cond: [{ $gt: ['$averageRating', 0] }, '$averageRating', null],
+      this.propertyModel.aggregate([
+        { $match: { ownerId: hostObjectId, isActive: true } },
+        {
+          $group: {
+            _id: null,
+            totalListings: { $sum: 1 },
+            avgRating: {
+              $avg: {
+                $cond: [{ $gt: ['$averageRating', 0] }, '$averageRating', null],
+              },
             },
           },
         },
-      },
-    ]),
-  ]);
+      ]),
+    ]);
 
-  const bStats = bookingStats[0];
-  const completedStays       = bStats.completedStays[0]?.total ?? 0;
-  const currentMonthEarnings = bStats.currentMonthEarnings[0]?.total ?? 0;
-  const occupiedCount        = bStats.occupiedPropertyIds.length;
-  const totalListings        = propertyStats[0]?.totalListings ?? 0;
-  const avgRating            = propertyStats[0]?.avgRating ?? 0;
-  const occupancyRate        = totalListings > 0 ? (occupiedCount / totalListings) * 100 : 0;
-  const isSuperhost          = completedStays >= 10 && avgRating >= 4.8;
+    const bStats = bookingStats[0];
+    const completedStays = bStats.completedStays[0]?.total ?? 0;
+    const currentMonthEarnings = bStats.currentMonthEarnings[0]?.total ?? 0;
+    const occupiedCount = bStats.occupiedPropertyIds.length;
+    const totalListings = propertyStats[0]?.totalListings ?? 0;
+    const avgRating = propertyStats[0]?.avgRating ?? 0;
+    const occupancyRate = totalListings > 0 ? (occupiedCount / totalListings) * 100 : 0;
+    const isSuperhost = completedStays >= 10 && avgRating >= 4.8;
 
-  return {
-    totalListings,
-    completedStays,
-    currentMonthEarnings,
-    avgRating:      Math.round(avgRating * 10) / 10,
-    occupancyRate:  Math.round(occupancyRate * 10) / 10,
-    isSuperhost,
-  };
-}
+    return {
+      totalListings,
+      completedStays,
+      currentMonthEarnings,
+      avgRating: Math.round(avgRating * 10) / 10,
+      occupancyRate: Math.round(occupancyRate * 10) / 10,
+      isSuperhost,
+    };
+  }
 
   // ════════════════════════════════════════════════════════════════════════════
   // AVAILABILITY

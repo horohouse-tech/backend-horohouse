@@ -182,6 +182,8 @@ export class Booking {
   @Prop()
   confirmedAt?: Date;
 
+  @Prop()
+  expiresAt?: Date;
   // ── Cancellation ─────────────────────────────────────────────────────────
 
   @Prop({
@@ -232,3 +234,6 @@ BookingSchema.index({ hostId: 1, status: 1, createdAt: -1 });
 
 // Automated jobs (e.g. auto-cancel unpaid after X hours)
 BookingSchema.index({ status: 1, paymentStatus: 1, createdAt: 1 });
+
+// Index for auto-cancellation queries
+BookingSchema.index({ status: 1, expiresAt: 1 });

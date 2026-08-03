@@ -69,6 +69,7 @@ export declare class Booking {
     hostNote?: string;
     isInstantBook: boolean;
     confirmedAt?: Date;
+    expiresAt?: Date;
     cancellation?: BookingCancellation;
     actualCheckIn?: Date;
     actualCheckOut?: Date;
