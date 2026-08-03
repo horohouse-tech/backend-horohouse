@@ -175,6 +175,9 @@ let UsersController = class UsersController {
         return this.usersService.recordHostPayout(id, record);
     }
     async findOne(id) {
+        return this.usersService.findPublicProfile(id);
+    }
+    async findOneFull(id) {
         return this.usersService.findOne(id);
     }
     async update(id, updateUserDto) {
@@ -611,14 +614,24 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     (0, roles_guard_2.Public)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get user by ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'User found' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get public-safe user profile by ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Public profile found' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'User not found' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)(':id/full'),
+    (0, roles_guard_1.Roles)(user_schema_1.UserRole.ADMIN),
+    (0, swagger_1.ApiOperation)({ summary: 'Get full user profile by ID (Admin only)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Full user profile' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "findOneFull", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, roles_guard_1.Roles)(user_schema_1.UserRole.ADMIN),

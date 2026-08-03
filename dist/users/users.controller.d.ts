@@ -63,7 +63,8 @@ export declare class UsersController {
         superhostSince?: Date;
     }>;
     recordHostPayout(id: string, record: RecordHostPayoutDto): Promise<any>;
-    findOne(id: string): Promise<User>;
+    findOne(id: string): Promise<Partial<User>>;
+    findOneFull(id: string): Promise<User>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<User>;
     remove(id: string): Promise<void>;
 }

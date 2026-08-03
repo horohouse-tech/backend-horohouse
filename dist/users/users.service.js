@@ -100,6 +100,19 @@ let UsersService = UsersService_1 = class UsersService {
         }
         return user;
     }
+    async findPublicProfile(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException('Invalid user ID');
+        }
+        const user = await this.userModel
+            .findById(id)
+            .select('name profilePicture bio city country role createdAt emailVerified phoneVerified languages')
+            .exec();
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return user;
+    }
     async findByFirebaseUid(firebaseUid) {
         return this.userModel.findOne({ firebaseUid }).exec();
     }

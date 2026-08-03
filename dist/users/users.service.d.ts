@@ -20,6 +20,7 @@ export declare class UsersService {
         totalPages: number;
     }>;
     findOne(id: string): Promise<User>;
+    findPublicProfile(id: string): Promise<Partial<User>>;
     findByFirebaseUid(firebaseUid: string): Promise<User | null>;
     findByEmail(email: string): Promise<User | null>;
     findByPhoneNumber(phoneNumber: string): Promise<User | null>;

@@ -535,12 +535,20 @@ export class UsersController {
   // GENERIC ADMIN ROUTES — keep at end to avoid shadowing named routes
   // ==========================================
 
-  @Get(':id')
+@Get(':id')
   @Public()
-  @ApiOperation({ summary: 'Get user by ID' })
-  @ApiResponse({ status: 200, description: 'User found' })
+  @ApiOperation({ summary: 'Get public-safe user profile by ID' })
+  @ApiResponse({ status: 200, description: 'Public profile found' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findOne(@Param('id') id: string): Promise<User> {
+  async findOne(@Param('id') id: string): Promise<Partial<User>> {
+    return this.usersService.findPublicProfile(id);
+  }
+
+  @Get(':id/full')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get full user profile by ID (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Full user profile' })
+  async findOneFull(@Param('id') id: string): Promise<User> {
     return this.usersService.findOne(id);
   }
 

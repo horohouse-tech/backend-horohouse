@@ -117,6 +117,27 @@ export class UsersService {
   }
 
   /**
+   * Public-safe profile — no email, phone, sessions, favorites, history, or tokens.
+   * This is what anonymous/unauthenticated visitors and other users can see.
+   */
+  async findPublicProfile(id: string): Promise<Partial<User>> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    const user = await this.userModel
+      .findById(id)
+      .select('name profilePicture bio city country role createdAt emailVerified phoneVerified languages')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  /**
    * Find user by Firebase UID
    */
   async findByFirebaseUid(firebaseUid: string): Promise<User | null> {
