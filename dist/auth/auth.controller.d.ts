@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService, AuthTokens, RegisterWithPhoneDto, RegisterWithEmailDto, LoginWithPhoneDto, LoginWithEmailDto, SendPhoneCodeDto, VerifyPhoneDto, JwtPayload } from './auth.service';
-import { User } from '../users/schemas/user.schema';
+import { User, UserRole } from '../users/schemas/user.schema';
 import { ForgotPasswordDto, ResetPasswordDto, ValidateResetTokenDto } from './dto/password-reset.dto';
 declare class RefreshTokenDto {
     refreshToken: string;
@@ -57,7 +57,7 @@ export declare class AuthController {
             name: string;
             email: string;
             phoneNumber: string;
-            role: import("../users/schemas/user.schema").UserRole;
+            role: UserRole;
             profilePicture: string | undefined;
             emailVerified: boolean;
             phoneVerified: boolean;

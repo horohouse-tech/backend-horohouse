@@ -33,11 +33,12 @@ export interface AuthTokens {
   user: Partial<User>;
 }
 
-// DTOs
+// ── DTOs ──────────────────────────────────────────────────────────────────
 export interface RegisterWithPhoneDto {
   name: string;
   phoneNumber: string;
   email?: string;
+  role?: UserRole;
   deviceInfo?: any;
 }
 
@@ -46,6 +47,7 @@ export interface RegisterWithEmailDto {
   email: string;
   password: string;
   phoneNumber?: string;
+  role?: UserRole;
   deviceInfo?: any;
 }
 
@@ -81,6 +83,21 @@ export interface GoogleAuthDto {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  
+  private static readonly SELF_ASSIGNABLE_ROLES: UserRole[] = [
+    UserRole.REGISTERED_USER,
+    UserRole.AGENT,
+    UserRole.LANDLORD,
+    UserRole.HOST,
+    UserRole.STUDENT,
+  ];
+
+  private resolveSelfAssignableRole(requested?: UserRole): UserRole {
+    if (requested && AuthService.SELF_ASSIGNABLE_ROLES.includes(requested)) {
+      return requested;
+    }
+    return UserRole.REGISTERED_USER;
+  }
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -89,6 +106,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) { }
+
 
   /**
    * Send phone verification code
@@ -154,32 +172,30 @@ export class AuthService {
   /**
    * Register with phone number
    */
-  async registerWithPhone(dto: RegisterWithPhoneDto, req?: any): Promise<AuthTokens> {
-    try {
-      const { name, phoneNumber, email } = dto; // role intentionally not destructured
-      const formattedPhone = this.smsService.formatPhoneNumber(phoneNumber);
+async registerWithPhone(dto: RegisterWithPhoneDto, req?: any): Promise<AuthTokens> {
+  try {
+    const { name, phoneNumber, email, role } = dto;
+    const formattedPhone = this.smsService.formatPhoneNumber(phoneNumber);
 
-      // Check if user already exists
-      const existingUser = await this.userModel.findOne({
-        $or: [
-          { phoneNumber: formattedPhone },
-          ...(email ? [{ email }] : [])
-        ]
-      });
+    const existingUser = await this.userModel.findOne({
+      $or: [
+        { phoneNumber: formattedPhone },
+        ...(email ? [{ email }] : [])
+      ]
+    });
 
-      if (existingUser) {
-        throw new ConflictException('User already exists with this phone number or email');
-      }
+    if (existingUser) {
+      throw new ConflictException('User already exists with this phone number or email');
+    }
 
-      // Create new user
-      const user = await this.userModel.create({
-        name,
-        phoneNumber: formattedPhone,
-        email,
-        role: UserRole.REGISTERED_USER, // always forced, never from input
-        phoneVerified: false,
-        emailVerified: false,
-      });
+    const user = await this.userModel.create({
+      name,
+      phoneNumber: formattedPhone,
+      email,
+      role: this.resolveSelfAssignableRole(role),
+      phoneVerified: false,
+      emailVerified: false,
+    });
 
       this.logger.log(`New user registered with phone: ${formattedPhone}`);
 
@@ -215,37 +231,33 @@ export class AuthService {
   /**
    * Register with email and password
    */
-  async registerWithEmail(dto: RegisterWithEmailDto, req?: any): Promise<AuthTokens> {
-    try {
-      const { name, email, password, phoneNumber } = dto;
-      // Normalize email
-      const normalizedEmail = email.trim().toLowerCase();
+async registerWithEmail(dto: RegisterWithEmailDto, req?: any): Promise<AuthTokens> {
+  try {
+    const { name, email, password, phoneNumber, role } = dto;
+    const normalizedEmail = email.trim().toLowerCase();
 
-      // Check if user already exists (case-insensitive)
-      const existingUser = await this.userModel.findOne({
-        $or: [
-          { email: { $regex: `^${normalizedEmail}$`, $options: 'i' } },
-          ...(phoneNumber ? [{ phoneNumber }] : [])
-        ]
-      });
+    const existingUser = await this.userModel.findOne({
+      $or: [
+        { email: { $regex: `^${normalizedEmail}$`, $options: 'i' } },
+        ...(phoneNumber ? [{ phoneNumber }] : [])
+      ]
+    });
 
-      if (existingUser) {
-        throw new ConflictException('User already exists with this email or phone number');
-      }
+    if (existingUser) {
+      throw new ConflictException('User already exists with this email or phone number');
+    }
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-      // Create new user
-      const user = await this.userModel.create({
-        name,
-        email: normalizedEmail,
-        password: hashedPassword,
-        phoneNumber: phoneNumber || `temp_${Date.now()}`, // Temporary phone number
-        role: UserRole.REGISTERED_USER,
-        phoneVerified: false,
-        emailVerified: false,
-      });
+    const user = await this.userModel.create({
+      name,
+      email: normalizedEmail,
+      password: hashedPassword,
+      phoneNumber: phoneNumber || `temp_${Date.now()}`,
+      role: this.resolveSelfAssignableRole(role),
+      phoneVerified: false,
+      emailVerified: false,
+    });
 
       this.logger.log(`New user registered with email: ${normalizedEmail}`);
 

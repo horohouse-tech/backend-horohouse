@@ -24,13 +24,27 @@ const crypto = require("crypto");
 const sms_service_1 = require("./sms.service");
 const email_service_1 = require("../email/email.service");
 const user_schema_1 = require("../users/schemas/user.schema");
-let AuthService = AuthService_1 = class AuthService {
+let AuthService = class AuthService {
+    static { AuthService_1 = this; }
     userModel;
     smsService;
     emailService;
     jwtService;
     configService;
     logger = new common_1.Logger(AuthService_1.name);
+    static SELF_ASSIGNABLE_ROLES = [
+        user_schema_1.UserRole.REGISTERED_USER,
+        user_schema_1.UserRole.AGENT,
+        user_schema_1.UserRole.LANDLORD,
+        user_schema_1.UserRole.HOST,
+        user_schema_1.UserRole.STUDENT,
+    ];
+    resolveSelfAssignableRole(requested) {
+        if (requested && AuthService_1.SELF_ASSIGNABLE_ROLES.includes(requested)) {
+            return requested;
+        }
+        return user_schema_1.UserRole.REGISTERED_USER;
+    }
     constructor(userModel, smsService, emailService, jwtService, configService) {
         this.userModel = userModel;
         this.smsService = smsService;
@@ -76,7 +90,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async registerWithPhone(dto, req) {
         try {
-            const { name, phoneNumber, email } = dto;
+            const { name, phoneNumber, email, role } = dto;
             const formattedPhone = this.smsService.formatPhoneNumber(phoneNumber);
             const existingUser = await this.userModel.findOne({
                 $or: [
@@ -91,7 +105,7 @@ let AuthService = AuthService_1 = class AuthService {
                 name,
                 phoneNumber: formattedPhone,
                 email,
-                role: user_schema_1.UserRole.REGISTERED_USER,
+                role: this.resolveSelfAssignableRole(role),
                 phoneVerified: false,
                 emailVerified: false,
             });
@@ -119,7 +133,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async registerWithEmail(dto, req) {
         try {
-            const { name, email, password, phoneNumber } = dto;
+            const { name, email, password, phoneNumber, role } = dto;
             const normalizedEmail = email.trim().toLowerCase();
             const existingUser = await this.userModel.findOne({
                 $or: [
@@ -136,7 +150,7 @@ let AuthService = AuthService_1 = class AuthService {
                 email: normalizedEmail,
                 password: hashedPassword,
                 phoneNumber: phoneNumber || `temp_${Date.now()}`,
-                role: user_schema_1.UserRole.REGISTERED_USER,
+                role: this.resolveSelfAssignableRole(role),
                 phoneVerified: false,
                 emailVerified: false,
             });

@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsEnum } from 'class-validator';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 import { Throttle } from '@nestjs/throttler';
@@ -32,7 +32,7 @@ import {
 } from './auth.service';
 import { Public } from './guards/roles.guard';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
-import { User } from '../users/schemas/user.schema';
+import { User, UserRole } from '../users/schemas/user.schema';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 import { ForgotPasswordDto, ResetPasswordDto, ValidateResetTokenDto } from './dto/password-reset.dto';
 
@@ -57,6 +57,10 @@ class RegisterPhoneDto {
   email?: string;
 
   @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  @IsOptional()
   deviceInfo?: any;
 }
 
@@ -76,6 +80,10 @@ class RegisterEmailDto {
   @IsString()
   @IsOptional()
   phoneNumber?: string;
+
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 
   @IsOptional()
   deviceInfo?: any;

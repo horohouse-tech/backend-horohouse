@@ -22,6 +22,7 @@ export interface RegisterWithPhoneDto {
     name: string;
     phoneNumber: string;
     email?: string;
+    role?: UserRole;
     deviceInfo?: any;
 }
 export interface RegisterWithEmailDto {
@@ -29,6 +30,7 @@ export interface RegisterWithEmailDto {
     email: string;
     password: string;
     phoneNumber?: string;
+    role?: UserRole;
     deviceInfo?: any;
 }
 export interface LoginWithPhoneDto {
@@ -62,6 +64,8 @@ export declare class AuthService {
     private jwtService;
     private configService;
     private readonly logger;
+    private static readonly SELF_ASSIGNABLE_ROLES;
+    private resolveSelfAssignableRole;
     constructor(userModel: Model<UserDocument>, smsService: SmsService, emailService: EmailService, jwtService: JwtService, configService: ConfigService);
     sendPhoneVerificationCode(dto: SendPhoneCodeDto): Promise<{
         message: string;

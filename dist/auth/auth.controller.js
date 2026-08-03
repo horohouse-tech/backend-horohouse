@@ -20,6 +20,7 @@ const throttler_1 = require("@nestjs/throttler");
 const auth_service_1 = require("./auth.service");
 const roles_guard_1 = require("./guards/roles.guard");
 const jwt_auth_guard_1 = require("./guards/jwt.auth.guard");
+const user_schema_1 = require("../users/schemas/user.schema");
 const google_oauth_guard_1 = require("./guards/google-oauth.guard");
 const password_reset_dto_1 = require("./dto/password-reset.dto");
 class SendPhoneCodeRequestDto {
@@ -34,6 +35,7 @@ class RegisterPhoneDto {
     name;
     phoneNumber;
     email;
+    role;
     deviceInfo;
 }
 __decorate([
@@ -53,6 +55,11 @@ __decorate([
 ], RegisterPhoneDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(user_schema_1.UserRole),
+    __metadata("design:type", String)
+], RegisterPhoneDto.prototype, "role", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], RegisterPhoneDto.prototype, "deviceInfo", void 0);
 class RegisterEmailDto {
@@ -60,6 +67,7 @@ class RegisterEmailDto {
     email;
     password;
     phoneNumber;
+    role;
     deviceInfo;
 }
 __decorate([
@@ -82,6 +90,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], RegisterEmailDto.prototype, "phoneNumber", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(user_schema_1.UserRole),
+    __metadata("design:type", String)
+], RegisterEmailDto.prototype, "role", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
