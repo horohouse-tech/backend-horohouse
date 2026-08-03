@@ -713,13 +713,9 @@ export class UsersService {
       {
         $project: {
           name: 1,
-          email: 1,
-          phoneNumber: 1,
           profilePicture: 1,
           agency: 1,
           bio: 1,
-          location: 1,
-          address: 1,
           city: 1,
           totalProperties: 1,
           activeProperties: 1,
@@ -779,17 +775,11 @@ export class UsersService {
       {
         $project: {
           name: 1,
-          email: 1,
-          phoneNumber: 1,
           profilePicture: 1,
           bio: 1,
-          location: 1,
-          address: 1,
           city: 1,
           totalProperties: 1,
           activeProperties: 1,
-          totalRentalIncome: 1,
-          occupancyRate: 1,
           createdAt: 1,
         },
       },
@@ -835,23 +825,18 @@ export class UsersService {
     return {
       id: agent._id.toString(),
       name: agent.name,
-      email: agent.email,
-      phoneNumber: agent.phoneNumber,
       profilePicture: agent.profilePicture,
       agency: agent.agency,
       bio: agent.bio,
       city: agent.city,
       country: agent.country,
-      address: agent.address,
-      location: agent.location,
       totalProperties: stats.totalProperties,
       activeProperties: stats.activeProperties,
       propertiesSold: stats.propertiesSold,
       propertiesListed: stats.totalProperties,
-      licenseNumber: agent.licenseNumber,
       yearsOfExperience: this.calculateYearsOfExperience(agent.createdAt),
       specialties: this.getAgentSpecialties(agent, stats),
-      languages: agent.languages || ['English', 'French'], // Default if not set
+      languages: agent.languages || ['English', 'French'],
       serviceAreas: this.getAgentServiceAreas(agent, stats.cities),
       createdAt: agent.createdAt,
     };
@@ -879,20 +864,13 @@ export class UsersService {
     return {
       id: landlord._id.toString(),
       name: landlord.name,
-      email: landlord.email,
-      phoneNumber: landlord.phoneNumber,
       profilePicture: landlord.profilePicture,
       bio: landlord.bio,
       city: landlord.city,
       country: landlord.country,
-      address: landlord.address,
-      location: landlord.location,
       totalProperties: stats.totalProperties,
       activeProperties: stats.activeProperties,
       propertiesSold: stats.propertiesSold,
-      totalRentalIncome: landlord.totalRentalIncome,
-      occupancyRate: landlord.occupancyRate,
-      tenantsCount: landlord.tenants?.length || 0,
       createdAt: landlord.createdAt,
     };
   }
@@ -1792,8 +1770,6 @@ export class UsersService {
       {
         $project: {
           name: 1,
-          email: 1,
-          phoneNumber: 1,
           profilePicture: 1,
           city: 1,
           country: 1,
@@ -1802,7 +1778,6 @@ export class UsersService {
           'hostProfile.isSuperhost': 1,
           'hostProfile.verificationStatus': 1,
           'hostProfile.completedStays': 1,
-          'hostProfile.totalEarnings': 1,
           'hostProfile.responseRate': 1,
           averageRating: 1,
           createdAt: 1,
@@ -1867,14 +1842,10 @@ export class UsersService {
     return {
       id: host._id.toString(),
       name: host.name,
-      email: host.email,
-      phoneNumber: host.phoneNumber,
       profilePicture: host.profilePicture,
       bio: host.bio,
       city: host.city,
       country: host.country,
-      address: host.address,
-      location: host.location,
       languages: host.languages,
       averageRating: reviewStats.averageRating,
       reviewCount: reviewStats.totalReviews,
@@ -1886,6 +1857,8 @@ export class UsersService {
         ? {
             ...hp,
             payoutAccounts: payoutAccountsSummary,
+            totalEarnings: undefined,
+            currentMonthEarnings: undefined,
           }
         : null,
       createdAt: host.createdAt,
