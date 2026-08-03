@@ -45,11 +45,22 @@ let AuthService = AuthService_1 = class AuthService {
                 throw new common_1.BadRequestException('Invalid phone number format');
             }
             const formattedPhone = this.smsService.formatPhoneNumber(phoneNumber);
+            const existing = await this.userModel
+                .findOne({ phoneNumber: formattedPhone })
+                .select('phoneVerificationSentAt')
+                .lean();
+            const COOLDOWN_MS = 60 * 1000;
+            if (existing &&
+                existing.phoneVerificationSentAt &&
+                Date.now() - new Date(existing.phoneVerificationSentAt).getTime() < COOLDOWN_MS) {
+                throw new common_1.BadRequestException('A verification code was already sent recently. Please wait before requesting another.');
+            }
             const verificationCode = this.smsService.generateVerificationCode();
             const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
             await this.userModel.updateOne({ phoneNumber: formattedPhone }, {
                 phoneVerificationCode: verificationCode,
                 phoneVerificationExpires: expiresAt,
+                phoneVerificationSentAt: new Date(),
             }, { upsert: true, setDefaultsOnInsert: true });
             const smsSent = await this.smsService.sendVerificationCode(formattedPhone, verificationCode);
             if (!smsSent) {

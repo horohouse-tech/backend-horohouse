@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RecordHostPayoutDto = exports.VerifyHostDto = exports.UpdateHostProfileDto = exports.PayoutAccountDto = exports.SetRoleDto = exports.UpdateTenantDto = exports.CreateTenantDto = exports.UserStatsDto = exports.PaginatedAgentsResponseDto = exports.AgentResponseDto = exports.AgentStatsDto = exports.PaginatedUsersResponseDto = exports.UserResponseDto = exports.GetUsersQueryDto = exports.SearchQueryDto = exports.UpdatePreferencesDto = exports.UpdateUserDto = exports.CreateUserDto = exports.UserPreferencesDto = exports.GetViewedPropertiesDto = exports.LocationDto = void 0;
+exports.RecordHostPayoutDto = exports.VerifyHostDto = exports.UpdateHostProfileDto = exports.PayoutAccountDto = exports.SetRoleDto = exports.UpdateTenantDto = exports.CreateTenantDto = exports.UserStatsDto = exports.PaginatedAgentsResponseDto = exports.AgentResponseDto = exports.AgentStatsDto = exports.PaginatedUsersResponseDto = exports.UserResponseDto = exports.GetUsersQueryDto = exports.SearchQueryDto = exports.UpdatePreferencesDto = exports.UpdateOwnProfileDto = exports.UpdateUserDto = exports.CreateUserDto = exports.UserPreferencesDto = exports.GetViewedPropertiesDto = exports.LocationDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -430,6 +430,16 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], UpdateUserDto.prototype, "propertiesSold", void 0);
+class UpdateOwnProfileDto extends (0, swagger_1.OmitType)(UpdateUserDto, [
+    'isActive',
+    'emailVerified',
+    'phoneVerified',
+    'propertiesListed',
+    'propertiesSold',
+    'role',
+]) {
+}
+exports.UpdateOwnProfileDto = UpdateOwnProfileDto;
 class UpdatePreferencesDto extends UserPreferencesDto {
 }
 exports.UpdatePreferencesDto = UpdatePreferencesDto;

@@ -18,8 +18,9 @@ import {
   IsIn
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { UserRole, PayoutMethod } from '../schemas/user.schema';
+
 
 // Location DTO for geospatial data
 export class LocationDto {
@@ -353,6 +354,15 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @Min(0)
   propertiesSold?: number;
 }
+
+export class UpdateOwnProfileDto extends OmitType(UpdateUserDto, [
+  'isActive',
+  'emailVerified',
+  'phoneVerified',
+  'propertiesListed',
+  'propertiesSold',
+  'role',
+] as const) {}
 
 // Update Preferences DTO
 export class UpdatePreferencesDto extends UserPreferencesDto { }

@@ -1,5 +1,5 @@
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto, UpdatePreferencesDto, CreateTenantDto, UpdateTenantDto, SetRoleDto, UpdateHostProfileDto, VerifyHostDto, RecordHostPayoutDto } from './dto';
+import { CreateUserDto, UpdateUserDto, UpdatePreferencesDto, CreateTenantDto, UpdateTenantDto, SetRoleDto, UpdateHostProfileDto, VerifyHostDto, RecordHostPayoutDto, UpdateOwnProfileDto } from './dto';
 import { User, UserRole } from './schemas/user.schema';
 export declare class UsersController {
     private readonly usersService;
@@ -24,7 +24,7 @@ export declare class UsersController {
     getSearchHistory(req: any, limit?: number): Promise<any[]>;
     updatePreferences(req: any, preferences: UpdatePreferencesDto): Promise<User>;
     uploadProfilePicture(req: any): Promise<User>;
-    updateMe(req: any, updateUserDto: UpdateUserDto): Promise<User>;
+    updateMe(req: any, updateUserDto: UpdateOwnProfileDto): Promise<User>;
     setMyRole(req: any, body: SetRoleDto): Promise<User>;
     getMyTenants(req: any): Promise<{
         tenants: import("./schemas/user.schema").TenantRecord[];

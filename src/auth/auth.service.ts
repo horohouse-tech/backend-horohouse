@@ -102,6 +102,25 @@ export class AuthService {
       }
 
       const formattedPhone = this.smsService.formatPhoneNumber(phoneNumber);
+
+      // Per-phone-number cooldown — independent of IP-based throttling,
+      // so rotating IPs can't be used to spam a single victim's phone.
+      const existing = await this.userModel
+        .findOne({ phoneNumber: formattedPhone })
+        .select('phoneVerificationSentAt')
+        .lean();
+
+      const COOLDOWN_MS = 60 * 1000; // 1 code per phone number per 60s
+      if (
+        existing &&
+        (existing as any).phoneVerificationSentAt &&
+        Date.now() - new Date((existing as any).phoneVerificationSentAt).getTime() < COOLDOWN_MS
+      ) {
+        throw new BadRequestException(
+          'A verification code was already sent recently. Please wait before requesting another.',
+        );
+      }
+
       const verificationCode = this.smsService.generateVerificationCode();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
@@ -111,6 +130,7 @@ export class AuthService {
         {
           phoneVerificationCode: verificationCode,
           phoneVerificationExpires: expiresAt,
+          phoneVerificationSentAt: new Date(),
         },
         { upsert: true, setDefaultsOnInsert: true }
       );

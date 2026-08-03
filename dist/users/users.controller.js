@@ -76,9 +76,6 @@ let UsersController = class UsersController {
         return this.usersService.uploadProfilePicture(req.user.id, file);
     }
     async updateMe(req, updateUserDto) {
-        if (updateUserDto.role) {
-            delete updateUserDto.role;
-        }
         return this.usersService.update(req.user.id, updateUserDto);
     }
     async setMyRole(req, body) {
@@ -301,10 +298,11 @@ __decorate([
     (0, common_1.Patch)('me'),
     (0, swagger_1.ApiOperation)({ summary: 'Update current user profile' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile updated successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Attempted to set a restricted field' }),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, dto_1.UpdateUserDto]),
+    __metadata("design:paramtypes", [Object, dto_1.UpdateOwnProfileDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateMe", null);
 __decorate([

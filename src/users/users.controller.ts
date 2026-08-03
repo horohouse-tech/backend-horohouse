@@ -23,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto, UpdatePreferencesDto, CreateTenantDto, UpdateTenantDto, SetRoleDto, UpdateHostProfileDto, VerifyHostDto, RecordHostPayoutDto } from './dto';
+import { CreateUserDto, UpdateUserDto, UpdatePreferencesDto, CreateTenantDto, UpdateTenantDto, SetRoleDto, UpdateHostProfileDto, VerifyHostDto, RecordHostPayoutDto, UpdateOwnProfileDto } from './dto';
 import { User, UserRole } from './schemas/user.schema';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { Public } from '../auth/guards/roles.guard';
@@ -179,14 +179,11 @@ export class UsersController {
   @Patch('me')
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  @ApiResponse({ status: 400, description: 'Attempted to set a restricted field' })
   async updateMe(
     @Req() req: any,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateOwnProfileDto,
   ): Promise<User> {
-    // SECURITY: Prevent ordinary users from spoofing their role via the standard update dto
-    if (updateUserDto.role) {
-      delete updateUserDto.role;
-    }
     return this.usersService.update(req.user.id, updateUserDto);
   }
 

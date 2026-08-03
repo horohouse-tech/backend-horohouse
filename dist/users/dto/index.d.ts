@@ -52,6 +52,9 @@ export declare class UpdateUserDto extends UpdateUserDto_base {
     propertiesListed?: number;
     propertiesSold?: number;
 }
+declare const UpdateOwnProfileDto_base: import("@nestjs/common").Type<Omit<UpdateUserDto, "role" | "isActive" | "emailVerified" | "phoneVerified" | "propertiesListed" | "propertiesSold">>;
+export declare class UpdateOwnProfileDto extends UpdateOwnProfileDto_base {
+}
 export declare class UpdatePreferencesDto extends UserPreferencesDto {
 }
 export declare class SearchQueryDto {
