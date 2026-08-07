@@ -120,4 +120,5 @@ export declare class ChatGateway implements OnGatewayInit, OnGatewayConnection, 
         call?: undefined;
     }>;
     private emitToUser;
+    broadcastNewMessage(conversationId: string, message: any): void;
 }

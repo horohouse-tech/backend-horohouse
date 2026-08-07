@@ -353,6 +353,9 @@ let ChatGateway = ChatGateway_1 = class ChatGateway {
             this.logger.warn(`⚠️ User ${userId} not connected, cannot emit ${event}`);
         }
     }
+    broadcastNewMessage(conversationId, message) {
+        this.server.to(`conversation:${conversationId}`).emit('message:new', { message });
+    }
 };
 exports.ChatGateway = ChatGateway;
 __decorate([

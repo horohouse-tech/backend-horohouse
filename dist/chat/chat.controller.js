@@ -23,12 +23,15 @@ const chat_dto_1 = require("./dto/chat.dto");
 const cloudinary_1 = require("../utils/cloudinary");
 const message_schema_1 = require("./schemas/message.schema");
 const call_dto_1 = require("./dto/call.dto");
+const chat_gateway_1 = require("./chat.gateway");
 let ChatController = class ChatController {
     chatService;
     callService;
-    constructor(chatService, callService) {
+    chatGateway;
+    constructor(chatService, callService, chatGateway) {
         this.chatService = chatService;
         this.callService = callService;
+        this.chatGateway = chatGateway;
     }
     async createConversation(req, dto) {
         return this.chatService.createConversation(req.user.userId, dto);
@@ -88,11 +91,9 @@ let ChatController = class ChatController {
         else if (files[0].mimetype.startsWith('audio/')) {
             messageType = message_schema_1.MessageType.AUDIO;
         }
-        const messageDto = {
-            ...dto,
-            type: messageType,
-        };
+        const messageDto = { ...dto, type: messageType, attachments };
         const message = await this.chatService.sendMessage(req.user.userId, messageDto);
+        this.chatGateway.broadcastNewMessage(dto.conversationId, message);
         return message;
     }
     async getMessages(req, conversationId, query) {
@@ -282,6 +283,7 @@ exports.ChatController = ChatController = __decorate([
     (0, common_1.Controller)('chat'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [chat_service_1.ChatService,
-        call_service_1.CallService])
+        call_service_1.CallService,
+        chat_gateway_1.ChatGateway])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

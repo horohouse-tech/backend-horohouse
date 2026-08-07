@@ -93,6 +93,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     this.logger.log('✅ Authentication middleware registered');
   }
+  
 
   async handleConnection(client: Socket) {
     try {
@@ -463,7 +464,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
-  // ============================================
+// ============================================
   // HELPER METHODS
   // ============================================
 
@@ -477,5 +478,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     } else {
       this.logger.warn(`⚠️ User ${userId} not connected, cannot emit ${event}`);
     }
+  }
+
+  broadcastNewMessage(conversationId: string, message: any) {
+    this.server.to(`conversation:${conversationId}`).emit('message:new', { message });
   }
 }

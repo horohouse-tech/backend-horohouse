@@ -2,10 +2,12 @@ import { ChatService } from './chat.service';
 import { CallService } from './call.service';
 import { CreateConversationDto, SendMessageDto, GetMessagesQueryDto, GetConversationsQueryDto, EditMessageDto, MarkAsReadDto, ArchiveConversationDto } from './dto/chat.dto';
 import { InitiateCallDto } from './dto/call.dto';
+import { ChatGateway } from './chat.gateway';
 export declare class ChatController {
     private readonly chatService;
     private readonly callService;
-    constructor(chatService: ChatService, callService: CallService);
+    private readonly chatGateway;
+    constructor(chatService: ChatService, callService: CallService, chatGateway: ChatGateway);
     createConversation(req: any, dto: CreateConversationDto): Promise<import("./schemas/conversation.schema").Conversation>;
     getConversations(req: any, query: GetConversationsQueryDto): Promise<any>;
     getConversation(req: any, id: string): Promise<import("./schemas/conversation.schema").Conversation>;

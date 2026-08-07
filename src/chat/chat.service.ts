@@ -15,6 +15,7 @@ import {
 } from './schemas/conversation.schema';
 import {
     Message,
+    MessageAttachment,
     MessageDocument,
     MessageStatus,
     MessageType,
@@ -244,10 +245,19 @@ export class ChatService {
     /**
      * Send a message
      */
-    async sendMessage(userId: string, dto: SendMessageDto): Promise<Message> {
+    async sendMessage(
+        userId: string,
+        dto: SendMessageDto & { attachments?: MessageAttachment[] },
+    ): Promise<Message> {
         try {
-            const { conversationId, content, type = MessageType.TEXT, propertyId, replyTo } = dto;
-
+            const {
+                conversationId,
+                content,
+                type = MessageType.TEXT,
+                attachments = [] as string[],
+                propertyId,
+                replyTo
+            } = dto;
             // Get conversation and validate user is participant
             const conversation = await this.getConversation(conversationId, userId);
 
@@ -282,16 +292,17 @@ export class ChatService {
             }
 
             // Create message
-            const message = await this.messageModel.create({
-                conversationId: new Types.ObjectId(conversationId),
-                senderId: new Types.ObjectId(userId),
-                recipientId: recipient.userId._id,
-                type,
-                content,
-                propertyReference,
-                replyTo: replyTo ? new Types.ObjectId(replyTo) : undefined,
-                status: MessageStatus.SENT,
-            });
+              const message = await this.messageModel.create({
+    conversationId: new Types.ObjectId(conversationId),
+    senderId: new Types.ObjectId(userId),
+    recipientId: recipient.userId._id,
+    type,
+    content,
+    attachments: attachments || [],   // ← ajouté
+    propertyReference,
+    replyTo: replyTo ? new Types.ObjectId(replyTo) : undefined,
+    status: MessageStatus.SENT,
+  });
 
             // Update conversation
             await this.conversationModel.findByIdAndUpdate(conversationId, {

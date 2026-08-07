@@ -172,7 +172,7 @@ let ChatService = ChatService_1 = class ChatService {
     }
     async sendMessage(userId, dto) {
         try {
-            const { conversationId, content, type = message_schema_1.MessageType.TEXT, propertyId, replyTo } = dto;
+            const { conversationId, content, type = message_schema_1.MessageType.TEXT, attachments = [], propertyId, replyTo } = dto;
             const conversation = await this.getConversation(conversationId, userId);
             let recipient = conversation.participants.find(p => p.userId._id.toString() !== userId);
             if (!recipient && conversation.participants.length > 0) {
@@ -201,6 +201,7 @@ let ChatService = ChatService_1 = class ChatService {
                 recipientId: recipient.userId._id,
                 type,
                 content,
+                attachments: attachments || [],
                 propertyReference,
                 replyTo: replyTo ? new mongoose_2.Types.ObjectId(replyTo) : undefined,
                 status: message_schema_1.MessageStatus.SENT,

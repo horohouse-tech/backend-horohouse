@@ -31,14 +31,18 @@ import {
 import { uploadBufferToCloudinary } from '../utils/cloudinary';
 import { MessageType } from './schemas/message.schema';
 import { InitiateCallDto } from './dto/call.dto';
+import { ChatGateway } from './chat.gateway';
 
 @ApiTags('Chat')
 @ApiBearerAuth()
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
-    constructor(private readonly chatService: ChatService,
-        private readonly callService: CallService,) { }
+    constructor(
+        private readonly chatService: ChatService,
+        private readonly callService: CallService,
+        private readonly chatGateway: ChatGateway,
+    ) { }
 
     /**
      * Create or get conversation
@@ -121,11 +125,7 @@ export class ChatController {
     @ApiOperation({ summary: 'Send message with file attachments' })
     @ApiConsumes('multipart/form-data')
     @UseInterceptors(FilesInterceptor('files', 5)) // Max 5 files
-    async sendMessageWithAttachments(
-        @Request() req,
-        @Body() dto: SendMessageDto,
-        @UploadedFiles() files: Express.Multer.File[],
-    ) {
+    async sendMessageWithAttachments(@Request() req, @Body() dto: SendMessageDto, @UploadedFiles() files: Express.Multer.File[]) {
         if (!files || files.length === 0) {
             throw new BadRequestException('No files uploaded');
         }
@@ -172,16 +172,10 @@ export class ChatController {
             messageType = MessageType.AUDIO;
         }
 
-        // Send message with attachments
-        const messageDto: SendMessageDto = {
-            ...dto,
-            type: messageType,
-        };
+        const messageDto = { ...dto, type: messageType, attachments };
+        const message = await this.chatService.sendMessage(req.user.userId, messageDto as any);
 
-        const message = await this.chatService.sendMessage(req.user.userId, messageDto);
-
-        // Note: You'd need to add attachments field to the message in the service
-        // For now, this is a simplified version
+        this.chatGateway.broadcastNewMessage(dto.conversationId, message);
 
         return message;
     }

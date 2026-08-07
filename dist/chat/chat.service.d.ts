@@ -1,6 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { Conversation, ConversationDocument } from './schemas/conversation.schema';
-import { Message, MessageDocument, MessageStatus } from './schemas/message.schema';
+import { Message, MessageAttachment, MessageDocument, MessageStatus } from './schemas/message.schema';
 import { PropertyDocument } from '../properties/schemas/property.schema';
 import { UserDocument } from '../users/schemas/user.schema';
 import { CreateConversationDto, SendMessageDto, GetMessagesQueryDto, GetConversationsQueryDto, EditMessageDto } from './dto/chat.dto';
@@ -20,7 +20,9 @@ export declare class ChatService {
         totalPages: number;
     }>;
     getConversation(conversationId: string, userId: string): Promise<Conversation>;
-    sendMessage(userId: string, dto: SendMessageDto): Promise<Message>;
+    sendMessage(userId: string, dto: SendMessageDto & {
+        attachments?: MessageAttachment[];
+    }): Promise<Message>;
     getMessages(conversationId: string, userId: string, query: GetMessagesQueryDto): Promise<{
         messages: (import("mongoose").FlattenMaps<MessageDocument> & Required<{
             _id: Types.ObjectId;
