@@ -226,6 +226,7 @@ class CreatePropertyDto {
     depositAmount;
     maintenanceFee;
     contactPhone;
+    contactWhatsApp;
     contactEmail;
     keywords;
     nearbyAmenities;
@@ -459,6 +460,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePropertyDto.prototype, "contactPhone", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'WhatsApp number (primary contact channel in Cameroon)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePropertyDto.prototype, "contactWhatsApp", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsOptional)(),

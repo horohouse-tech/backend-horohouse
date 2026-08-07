@@ -443,6 +443,9 @@ export class Property {
   contactPhone?: string;
 
   @Prop()
+  contactWhatsApp?: string;
+
+  @Prop()
   contactEmail?: string;
 
   // ── SEO ───────────────────────────────────────────────────────────────────

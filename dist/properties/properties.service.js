@@ -953,6 +953,7 @@ let PropertiesService = PropertiesService_1 = class PropertiesService {
         return {
             title: 1,
             slug: 1,
+            description: 1,
             price: 1,
             pricingUnit: 1,
             type: 1,
@@ -960,6 +961,7 @@ let PropertiesService = PropertiesService_1 = class PropertiesService {
             city: 1,
             address: 1,
             neighborhood: 1,
+            country: 1,
             images: 1,
             amenities: 1,
             shortTermAmenities: 1,
@@ -979,6 +981,16 @@ let PropertiesService = PropertiesService_1 = class PropertiesService {
             ownerId: 1,
             agentId: 1,
             createdAt: 1,
+            area: 1,
+            floorNumber: 1,
+            totalFloors: 1,
+            depositAmount: 1,
+            maintenanceFee: 1,
+            contactPhone: 1,
+            contactWhatsApp: 1,
+            contactEmail: 1,
+            yearBuilt: 1,
+            pricePerSqm: 1,
         };
     }
     buildBaseListQuery(filters, includeInactive) {
@@ -1001,10 +1013,14 @@ let PropertiesService = PropertiesService_1 = class PropertiesService {
             query.listingType = filters.listingType;
         if (filters.city)
             query.city = filters.city.trim().toLowerCase();
+        if (filters.neighborhood)
+            query.neighborhood = new RegExp(filters.neighborhood.trim(), 'i');
         if (filters.bedrooms)
             query['amenities.bedrooms'] = { $gte: filters.bedrooms };
         if (filters.bathrooms)
             query['amenities.bathrooms'] = { $gte: filters.bathrooms };
+        if (filters.furnished !== undefined)
+            query['amenities.furnished'] = filters.furnished;
         if (filters.amenities?.length) {
             query.$and = filters.amenities.map((a) => ({ [`amenities.${a}`]: true }));
         }
@@ -1016,6 +1032,13 @@ let PropertiesService = PropertiesService_1 = class PropertiesService {
             query.cancellationPolicy = filters.cancellationPolicy;
         if (filters.minGuests)
             query['shortTermAmenities.maxGuests'] = { $gte: filters.minGuests };
+        if (filters.minArea !== undefined || filters.maxArea !== undefined) {
+            query.area = {};
+            if (filters.minArea !== undefined)
+                query.area.$gte = filters.minArea;
+            if (filters.maxArea !== undefined)
+                query.area.$lte = filters.maxArea;
+        }
         if (filters.latitude && filters.longitude) {
             if (filters.radius) {
                 query.location = {
@@ -1146,8 +1169,21 @@ let PropertiesService = PropertiesService_1 = class PropertiesService {
             raw.push(...property.description.toLowerCase().split(' '));
         if (property.city)
             raw.push(property.city.toLowerCase());
+        if (property.neighborhood)
+            raw.push(...property.neighborhood.toLowerCase().split(' '));
         if (property.type)
             raw.push(property.type.toString().toLowerCase());
+        if (property.listingType) {
+            raw.push(property.listingType.toString().toLowerCase());
+            if (property.listingType === 'rent')
+                raw.push('location', 'louer', 'rental');
+            if (property.listingType === 'sale')
+                raw.push('vente', 'vendre', 'acheter', 'sale');
+            if (property.listingType === 'short_term')
+                raw.push('sejour', 'nuit', 'hotel', 'airbnb');
+        }
+        if (property.amenities?.furnished)
+            raw.push('meuble', 'furnished');
         return [...new Set(raw)].filter((k) => k.length > 2);
     }
     validateShortTermFields(dto) {

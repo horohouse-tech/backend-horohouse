@@ -80,6 +80,10 @@ let PropertiesController = PropertiesController_1 = class PropertiesController {
             pricingUnit: query.pricingUnit,
             checkIn: query.checkIn ? new Date(query.checkIn) : undefined,
             checkOut: query.checkOut ? new Date(query.checkOut) : undefined,
+            minArea: query.minArea ? parseFloat(query.minArea) : undefined,
+            maxArea: query.maxArea ? parseFloat(query.maxArea) : undefined,
+            furnished: query.furnished !== undefined ? query.furnished === 'true' : undefined,
+            neighborhood: query.neighborhood,
         };
         if (query.bounds) {
             try {
@@ -348,6 +352,10 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'pricingUnit', required: false, enum: property_schema_1.PricingUnit }),
     (0, swagger_1.ApiQuery)({ name: 'checkIn', required: false, type: String, description: 'ISO date — filters available properties' }),
     (0, swagger_1.ApiQuery)({ name: 'checkOut', required: false, type: String, description: 'ISO date — filters available properties' }),
+    (0, swagger_1.ApiQuery)({ name: 'minArea', required: false, type: Number, description: 'Minimum area in m² (rent/sale)' }),
+    (0, swagger_1.ApiQuery)({ name: 'maxArea', required: false, type: Number, description: 'Maximum area in m² (rent/sale)' }),
+    (0, swagger_1.ApiQuery)({ name: 'furnished', required: false, type: Boolean, description: 'Filter furnished properties' }),
+    (0, swagger_1.ApiQuery)({ name: 'neighborhood', required: false, type: String, description: 'Neighborhood / quarter' }),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),

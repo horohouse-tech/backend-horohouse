@@ -66,7 +66,9 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
                 agentPreferences: user.agentPreferences,
                 onboardingCompleted: user.onboardingCompleted,
                 licenseNumber: user.licenseNumber,
-                agency: user.agency
+                agency: user.agency,
+                googleId: user.googleId,
+                hasPassword: !!user.password,
             };
             console.log('[JwtStrategy] Returning normalized user with userId:', normalizedUser.userId);
             return normalizedUser;

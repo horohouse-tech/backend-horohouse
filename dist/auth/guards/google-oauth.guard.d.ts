@@ -3,6 +3,8 @@ declare const GoogleOAuthGuard_base: import("@nestjs/passport").Type<import("@ne
 export declare class GoogleOAuthGuard extends GoogleOAuthGuard_base {
     getAuthenticateOptions(context: ExecutionContext): {
         state: any;
+    } | {
+        state?: undefined;
     };
     canActivate(context: ExecutionContext): Promise<boolean>;
 }

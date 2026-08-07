@@ -138,6 +138,7 @@ let Property = class Property {
     depositAmount;
     maintenanceFee;
     contactPhone;
+    contactWhatsApp;
     contactEmail;
     keywords;
     slug;
@@ -388,6 +389,10 @@ __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
 ], Property.prototype, "contactPhone", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Property.prototype, "contactWhatsApp", void 0);
 __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)

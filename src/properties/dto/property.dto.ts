@@ -290,6 +290,11 @@ export class CreatePropertyDto {
   @IsString()
   contactPhone?: string;
 
+  @ApiPropertyOptional({ description: 'WhatsApp number (primary contact channel in Cameroon)' })
+  @IsOptional()
+  @IsString()
+  contactWhatsApp?: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

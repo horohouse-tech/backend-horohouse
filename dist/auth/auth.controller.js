@@ -317,6 +317,8 @@ let AuthController = class AuthController {
                     profilePicture: req.user.profilePicture,
                     emailVerified: req.user.emailVerified || false,
                     phoneVerified: req.user.phoneVerified || false,
+                    googleId: req.user.googleId,
+                    hasPassword: !!req.user.hasPassword,
                 },
             };
         }
@@ -356,6 +358,16 @@ let AuthController = class AuthController {
     }
     async resendPhoneVerification(req) {
         return this.authService.resendPhoneVerification(req.user);
+    }
+    async deactivateAccount(req, res) {
+        const userId = '_id' in req.user ? req.user._id.toString() : req.user.sub;
+        const result = await this.authService.deactivateAccount(userId);
+        this.clearAuthCookies(res);
+        return result;
+    }
+    async disconnectGoogle(req) {
+        const userId = '_id' in req.user ? req.user._id.toString() : req.user.sub;
+        return this.authService.disconnectGoogle(userId);
     }
 };
 exports.AuthController = AuthController;
@@ -651,6 +663,33 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "resendPhoneVerification", null);
+__decorate([
+    (0, common_1.Post)('deactivate-account'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Self-service account deactivation — sets isActive=false and invalidates all sessions' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Account deactivated successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'User not found' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "deactivateAccount", null);
+__decorate([
+    (0, common_1.Post)('disconnect/google'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Disconnect Google social login from the account (requires password to be set)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Google account disconnected successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Cannot disconnect — user has no password set' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "disconnectGoogle", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
     (0, common_1.Controller)('auth'),

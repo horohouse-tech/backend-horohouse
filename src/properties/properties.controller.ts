@@ -103,6 +103,10 @@ export class PropertiesController {
   @ApiQuery({ name: 'pricingUnit', required: false, enum: PricingUnit })
   @ApiQuery({ name: 'checkIn', required: false, type: String, description: 'ISO date — filters available properties' })
   @ApiQuery({ name: 'checkOut', required: false, type: String, description: 'ISO date — filters available properties' })
+  @ApiQuery({ name: 'minArea', required: false, type: Number, description: 'Minimum area in m² (rent/sale)' })
+  @ApiQuery({ name: 'maxArea', required: false, type: Number, description: 'Maximum area in m² (rent/sale)' })
+  @ApiQuery({ name: 'furnished', required: false, type: Boolean, description: 'Filter furnished properties' })
+  @ApiQuery({ name: 'neighborhood', required: false, type: String, description: 'Neighborhood / quarter' })
 
 
   async findAll(
@@ -129,7 +133,11 @@ export class PropertiesController {
       pricingUnit: query.pricingUnit,
       checkIn: query.checkIn ? new Date(query.checkIn) : undefined,
       checkOut: query.checkOut ? new Date(query.checkOut) : undefined,
-
+      // Long-term / landlord filters
+      minArea: query.minArea ? parseFloat(query.minArea) : undefined,
+      maxArea: query.maxArea ? parseFloat(query.maxArea) : undefined,
+      furnished: query.furnished !== undefined ? query.furnished === 'true' : undefined,
+      neighborhood: query.neighborhood,
     };
 
     // Handle bounding box search

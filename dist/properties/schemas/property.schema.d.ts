@@ -195,6 +195,7 @@ export declare class Property {
     depositAmount?: number;
     maintenanceFee?: number;
     contactPhone?: string;
+    contactWhatsApp?: string;
     contactEmail?: string;
     keywords: string[];
     slug?: string;

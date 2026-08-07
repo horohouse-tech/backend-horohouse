@@ -123,4 +123,10 @@ export declare class AuthService {
     private getLocationFromIp;
     private parseTokenExpiration;
     cleanupExpiredSessions(): Promise<void>;
+    deactivateAccount(userId: string): Promise<{
+        message: string;
+    }>;
+    disconnectGoogle(userId: string): Promise<{
+        message: string;
+    }>;
 }

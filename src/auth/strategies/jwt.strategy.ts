@@ -63,7 +63,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         agentPreferences: user.agentPreferences,
         onboardingCompleted: user.onboardingCompleted,
         licenseNumber: user.licenseNumber,
-        agency: user.agency
+        agency: user.agency,
+        googleId: user.googleId,            // Social connection status
+        hasPassword: !!(user as any).password, // Indicates whether a password is set (password is select:false)
       };
 
       console.log('[JwtStrategy] Returning normalized user with userId:', normalizedUser.userId);

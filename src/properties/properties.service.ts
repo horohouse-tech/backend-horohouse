@@ -53,6 +53,11 @@ export interface PropertySearchFilters {
   pricingUnit?: PricingUnit;
   checkIn?: Date;
   checkOut?: Date;
+  // Long-term / landlord-specific filters
+  minArea?: number;
+  maxArea?: number;
+  furnished?: boolean;
+  neighborhood?: string;
 }
 
 export interface PropertySearchOptions {
@@ -366,7 +371,7 @@ export class PropertiesService implements OnModuleInit {
   }
 
   // ════════════════════════════════════════════════════════════════════════════
-  // FIND ONE
+  // FIND ONE 
   // ════════════════════════════════════════════════════════════════════════════
 
   async findOne(id: string, user?: User): Promise<Property> {
@@ -1303,6 +1308,7 @@ export class PropertiesService implements OnModuleInit {
     return {
       title: 1,
       slug: 1,
+      description: 1,
       price: 1,
       pricingUnit: 1,
       type: 1,
@@ -1310,6 +1316,7 @@ export class PropertiesService implements OnModuleInit {
       city: 1,
       address: 1,
       neighborhood: 1,
+      country: 1,
       images: 1,
       amenities: 1,
       shortTermAmenities: 1,
@@ -1329,6 +1336,17 @@ export class PropertiesService implements OnModuleInit {
       ownerId: 1,
       agentId: 1,
       createdAt: 1,
+      // Long-term / landlord fields
+      area: 1,
+      floorNumber: 1,
+      totalFloors: 1,
+      depositAmount: 1,
+      maintenanceFee: 1,
+      contactPhone: 1,
+      contactWhatsApp: 1,
+      contactEmail: 1,
+      yearBuilt: 1,
+      pricePerSqm: 1,
     };
   }
 
@@ -1352,8 +1370,10 @@ export class PropertiesService implements OnModuleInit {
     if (filters.propertyType) query.type = filters.propertyType;
     if (filters.listingType) query.listingType = filters.listingType;
     if (filters.city) query.city = filters.city.trim().toLowerCase();
+    if (filters.neighborhood) query.neighborhood = new RegExp(filters.neighborhood.trim(), 'i');
     if (filters.bedrooms) query['amenities.bedrooms'] = { $gte: filters.bedrooms };
     if (filters.bathrooms) query['amenities.bathrooms'] = { $gte: filters.bathrooms };
+    if (filters.furnished !== undefined) query['amenities.furnished'] = filters.furnished;
     if (filters.amenities?.length) {
       query.$and = filters.amenities.map((a) => ({ [`amenities.${a}`]: true }));
     }
@@ -1361,6 +1381,13 @@ export class PropertiesService implements OnModuleInit {
     if (filters.pricingUnit) query.pricingUnit = filters.pricingUnit;
     if (filters.cancellationPolicy) query.cancellationPolicy = filters.cancellationPolicy;
     if (filters.minGuests) query['shortTermAmenities.maxGuests'] = { $gte: filters.minGuests };
+
+    // Area filters (rent / sale listings)
+    if (filters.minArea !== undefined || filters.maxArea !== undefined) {
+      query.area = {};
+      if (filters.minArea !== undefined) query.area.$gte = filters.minArea;
+      if (filters.maxArea !== undefined) query.area.$lte = filters.maxArea;
+    }
 
     // Geospatial
     if (filters.latitude && filters.longitude) {
@@ -1516,10 +1543,20 @@ export class PropertiesService implements OnModuleInit {
 
   private generateKeywords(property: any): string[] {
     const raw: string[] = [];
-    if (property.title) raw.push(...property.title.toLowerCase().split(' '));
+    if (property.title)       raw.push(...property.title.toLowerCase().split(' '));
     if (property.description) raw.push(...property.description.toLowerCase().split(' '));
-    if (property.city) raw.push(property.city.toLowerCase());
-    if (property.type) raw.push(property.type.toString().toLowerCase());
+    if (property.city)        raw.push(property.city.toLowerCase());
+    if (property.neighborhood) raw.push(...property.neighborhood.toLowerCase().split(' '));
+    if (property.type)        raw.push(property.type.toString().toLowerCase());
+    // Listing type labels (help surface rent/sale/short_term listings in search)
+    if (property.listingType) {
+      raw.push(property.listingType.toString().toLowerCase());
+      if (property.listingType === 'rent')  raw.push('location', 'louer', 'rental');
+      if (property.listingType === 'sale')  raw.push('vente', 'vendre', 'acheter', 'sale');
+      if (property.listingType === 'short_term') raw.push('sejour', 'nuit', 'hotel', 'airbnb');
+    }
+    // Furnished boost
+    if (property.amenities?.furnished) raw.push('meuble', 'furnished');
     return [...new Set(raw)].filter((k) => k.length > 2);
   }
 

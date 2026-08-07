@@ -16,24 +16,24 @@ export class GoogleOAuthGuard extends AuthGuard('google') {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<FastifyRequest>();
     const response = context.switchToHttp().getResponse<FastifyReply>();
-    
+
     // Convert Fastify's response methods to Express-style for Passport compatibility
     // We need to cast to 'any' to add these methods dynamically
     const res = response as any;
-    
+
     if (!res.setHeader) {
       res.setHeader = (name: string, value: string | string[]) => {
         response.header(name, value);
         return response;
       };
     }
-    
+
     if (!res.end) {
       res.end = (data?: any) => {
         return response.send(data);
       };
     }
-    
+
     if (!res.redirect) {
       res.redirect = (statusOrUrl: number | string, url?: string) => {
         if (typeof statusOrUrl === 'string') {

@@ -76,6 +76,7 @@ export declare class CreatePropertyDto {
     depositAmount?: number;
     maintenanceFee?: number;
     contactPhone?: string;
+    contactWhatsApp?: string;
     contactEmail?: string;
     keywords?: string[];
     nearbyAmenities?: string[];

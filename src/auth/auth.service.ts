@@ -539,7 +539,7 @@ async registerWithEmail(dto: RegisterWithEmailDto, req?: any): Promise<AuthToken
    * Validate user from JWT payload
    */
   async validateUser(payload: JwtPayload): Promise<UserDocument> {
-    const user = await this.userModel.findById(payload.sub);
+    const user = await this.userModel.findById(payload.sub).select('+password');
     if (!user || !user.isActive) {
       throw new UnauthorizedException('User not found or inactive');
     }
@@ -1169,6 +1169,60 @@ async registerWithEmail(dto: RegisterWithEmailDto, req?: any): Promise<AuthToken
       this.logger.log('Expired sessions cleaned up');
     } catch (error) {
       this.logger.error('Failed to cleanup expired sessions:', error);
+    }
+  }
+
+  /**
+   * Self-service account deactivation.
+   * Sets isActive=false and wipes all sessions so existing tokens stop working.
+   */
+  async deactivateAccount(userId: string): Promise<{ message: string }> {
+    try {
+      const user = await this.userModel.findById(userId);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      user.isActive = false;
+      user.sessions = [];
+      await user.save();
+
+      this.logger.log(`Account deactivated by user: ${userId}`);
+
+      return { message: 'Account deactivated successfully' };
+    } catch (error) {
+      this.logger.error('Account deactivation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Disconnect a social provider (e.g. Google) from the user's account.
+   * Only allowed when the user has a password set, to prevent lock-out.
+   */
+  async disconnectGoogle(userId: string): Promise<{ message: string }> {
+    try {
+      const user = await this.userModel.findById(userId).select('+password');
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (!user.password) {
+        throw new BadRequestException(
+          'You must set a password before disconnecting Google to avoid losing account access.',
+        );
+      }
+
+      await this.userModel.findByIdAndUpdate(userId, {
+        $unset: { googleId: '' },
+      });
+
+      this.logger.log(`Google disconnected for user: ${userId}`);
+
+      return { message: 'Google account disconnected successfully' };
+    } catch (error) {
+      this.logger.error('Google disconnect failed:', error);
+      throw error;
     }
   }
 }

@@ -34,6 +34,10 @@ export interface PropertySearchFilters {
     pricingUnit?: PricingUnit;
     checkIn?: Date;
     checkOut?: Date;
+    minArea?: number;
+    maxArea?: number;
+    furnished?: boolean;
+    neighborhood?: string;
 }
 export interface PropertySearchOptions {
     page?: number;

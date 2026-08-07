@@ -442,6 +442,8 @@ export class AuthController {
           profilePicture: req.user.profilePicture,
           emailVerified: req.user.emailVerified || false,
           phoneVerified: req.user.phoneVerified || false,
+          googleId: (req.user as any).googleId,
+          hasPassword: !!(req.user as any).hasPassword,
         },
       };
     } catch (error) {
@@ -539,5 +541,36 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Verification SMS sent' })
   async resendPhoneVerification(@Req() req: FastifyRequest & { user: User }) {
     return this.authService.resendPhoneVerification(req.user);
+  }
+
+  @Post('deactivate-account')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Self-service account deactivation — sets isActive=false and invalidates all sessions' })
+  @ApiResponse({ status: 200, description: 'Account deactivated successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async deactivateAccount(
+    @Req() req: FastifyRequest & { user: User | JwtPayload },
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
+    const userId = '_id' in req.user ? req.user._id.toString() : req.user.sub;
+    const result = await this.authService.deactivateAccount(userId);
+    this.clearAuthCookies(res);
+    return result;
+  }
+
+  @Post('disconnect/google')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Disconnect Google social login from the account (requires password to be set)' })
+  @ApiResponse({ status: 200, description: 'Google account disconnected successfully' })
+  @ApiResponse({ status: 400, description: 'Cannot disconnect — user has no password set' })
+  async disconnectGoogle(
+    @Req() req: FastifyRequest & { user: User | JwtPayload },
+  ) {
+    const userId = '_id' in req.user ? req.user._id.toString() : req.user.sub;
+    return this.authService.disconnectGoogle(userId);
   }
 }

@@ -356,7 +356,7 @@ let AuthService = class AuthService {
         }
     }
     async validateUser(payload) {
-        const user = await this.userModel.findById(payload.sub);
+        const user = await this.userModel.findById(payload.sub).select('+password');
         if (!user || !user.isActive) {
             throw new common_1.UnauthorizedException('User not found or inactive');
         }
@@ -785,6 +785,43 @@ let AuthService = class AuthService {
         }
         catch (error) {
             this.logger.error('Failed to cleanup expired sessions:', error);
+        }
+    }
+    async deactivateAccount(userId) {
+        try {
+            const user = await this.userModel.findById(userId);
+            if (!user) {
+                throw new common_1.NotFoundException('User not found');
+            }
+            user.isActive = false;
+            user.sessions = [];
+            await user.save();
+            this.logger.log(`Account deactivated by user: ${userId}`);
+            return { message: 'Account deactivated successfully' };
+        }
+        catch (error) {
+            this.logger.error('Account deactivation failed:', error);
+            throw error;
+        }
+    }
+    async disconnectGoogle(userId) {
+        try {
+            const user = await this.userModel.findById(userId).select('+password');
+            if (!user) {
+                throw new common_1.NotFoundException('User not found');
+            }
+            if (!user.password) {
+                throw new common_1.BadRequestException('You must set a password before disconnecting Google to avoid losing account access.');
+            }
+            await this.userModel.findByIdAndUpdate(userId, {
+                $unset: { googleId: '' },
+            });
+            this.logger.log(`Google disconnected for user: ${userId}`);
+            return { message: 'Google account disconnected successfully' };
+        }
+        catch (error) {
+            this.logger.error('Google disconnect failed:', error);
+            throw error;
         }
     }
 };

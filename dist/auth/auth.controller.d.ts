@@ -61,6 +61,8 @@ export declare class AuthController {
             profilePicture: string | undefined;
             emailVerified: boolean;
             phoneVerified: boolean;
+            googleId: any;
+            hasPassword: boolean;
         };
     }>;
     changePassword(body: {
@@ -116,6 +118,16 @@ export declare class AuthController {
     }>;
     resendPhoneVerification(req: FastifyRequest & {
         user: User;
+    }): Promise<{
+        message: string;
+    }>;
+    deactivateAccount(req: FastifyRequest & {
+        user: User | JwtPayload;
+    }, res: FastifyReply): Promise<{
+        message: string;
+    }>;
+    disconnectGoogle(req: FastifyRequest & {
+        user: User | JwtPayload;
     }): Promise<{
         message: string;
     }>;
