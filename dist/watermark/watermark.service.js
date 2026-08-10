@@ -5,24 +5,31 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var WatermarkService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WatermarkService = void 0;
 const common_1 = require("@nestjs/common");
 const fs = require("fs");
-const path = require("path");
 const sharp = require("sharp");
-let WatermarkService = class WatermarkService {
+let WatermarkService = WatermarkService_1 = class WatermarkService {
+    logger = new common_1.Logger(WatermarkService_1.name);
     fontBase64 = (() => {
-        const fontPath = path.join(__dirname, '..', '..', '..', 'node_modules', '@fontsource', 'inter', 'files', 'inter-latin-700-normal.woff');
-        return fs.readFileSync(fontPath).toString('base64');
+        try {
+            const fontPath = require.resolve('@fontsource/inter/files/inter-latin-700-normal.woff');
+            return fs.readFileSync(fontPath).toString('base64');
+        }
+        catch (err) {
+            console.error('WatermarkService: failed to load Inter font, watermark text will render without embedded font', err);
+            return '';
+        }
     })();
     generateWatermarkSvg(width, height) {
         const cx = width / 2;
         const cy = height / 2;
         const halfDiag = Math.sqrt(cx * cx + cy * cy);
-        const radii = [halfDiag * 0.30, halfDiag * 0.65];
+        const radii = [halfDiag * 0.3, halfDiag * 0.65];
         const fontSize = Math.max(9, Math.round(width * 0.022));
-        const opacity = 0.30;
+        const opacity = 0.3;
         const label = 'HoroHouse';
         const circleTexts = radii.flatMap((r) => {
             const circumference = 2 * Math.PI * r;
@@ -49,16 +56,19 @@ let WatermarkService = class WatermarkService {
           >${label}</text>`;
             });
         });
-        const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-        <defs>
-          <style>
+        const fontFace = this.fontBase64
+            ? `
             @font-face {
               font-family: 'Inter';
               font-style: normal;
               font-weight: 700;
               src: url('data:font/woff;base64,${this.fontBase64}') format('woff');
-            }
+            }`
+            : '';
+        const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <defs>
+          <style>${fontFace}
           </style>
         </defs>
         ${circleTexts.join('\n')}
@@ -69,16 +79,18 @@ let WatermarkService = class WatermarkService {
         const image = sharp(imageBuffer);
         const { width = 800, height = 600 } = await image.metadata();
         return image
-            .composite([{
+            .composite([
+            {
                 input: this.generateWatermarkSvg(width, height),
                 top: 0,
                 left: 0,
-            }])
+            },
+        ])
             .toBuffer();
     }
 };
 exports.WatermarkService = WatermarkService;
-exports.WatermarkService = WatermarkService = __decorate([
+exports.WatermarkService = WatermarkService = WatermarkService_1 = __decorate([
     (0, common_1.Injectable)()
 ], WatermarkService);
 //# sourceMappingURL=watermark.service.js.map
