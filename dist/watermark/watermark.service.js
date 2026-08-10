@@ -8,8 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WatermarkService = void 0;
 const common_1 = require("@nestjs/common");
+const fs = require("fs");
+const path = require("path");
 const sharp = require("sharp");
 let WatermarkService = class WatermarkService {
+    fontBase64 = (() => {
+        const fontPath = path.join(__dirname, '..', '..', '..', 'node_modules', '@fontsource', 'inter', 'files', 'inter-latin-700-normal.woff');
+        return fs.readFileSync(fontPath).toString('base64');
+    })();
     generateWatermarkSvg(width, height) {
         const cx = width / 2;
         const cy = height / 2;
@@ -33,9 +39,9 @@ let WatermarkService = class WatermarkService {
             y="${y}"
             text-anchor="middle"
             dominant-baseline="middle"
-            font-family="Arial, sans-serif"
+            font-family="Inter, sans-serif"
             font-size="${fontSize}"
-            font-weight="bold"
+            font-weight="700"
             letter-spacing="1"
             fill="white"
             fill-opacity="${opacity}"
@@ -45,6 +51,16 @@ let WatermarkService = class WatermarkService {
         });
         const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <defs>
+          <style>
+            @font-face {
+              font-family: 'Inter';
+              font-style: normal;
+              font-weight: 700;
+              src: url('data:font/woff;base64,${this.fontBase64}') format('woff');
+            }
+          </style>
+        </defs>
         ${circleTexts.join('\n')}
       </svg>`;
         return Buffer.from(svg);

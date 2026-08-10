@@ -1,8 +1,33 @@
 import { Injectable } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as sharp from 'sharp';
 
 @Injectable()
 export class WatermarkService {
+  /**
+   * Base64-encoded Inter Bold font embedded at module load time.
+   * This is critical: librsvg (used by sharp) only renders fonts that are
+   * available via fontconfig. On most servers Arial is not installed, causing
+   * every character to be rendered as a □ replacement glyph.
+   * By embedding the font as a data URI inside the SVG <style> block we
+   * guarantee the text always renders correctly regardless of the server OS.
+   */
+  private readonly fontBase64: string = (() => {
+    const fontPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'node_modules',
+      '@fontsource',
+      'inter',
+      'files',
+      'inter-latin-700-normal.woff',
+    );
+    return fs.readFileSync(fontPath).toString('base64');
+  })();
+
   private generateWatermarkSvg(width: number, height: number): Buffer {
     const cx = width / 2;
     const cy = height / 2;
@@ -31,9 +56,9 @@ export class WatermarkService {
             y="${y}"
             text-anchor="middle"
             dominant-baseline="middle"
-            font-family="Arial, sans-serif"
+            font-family="Inter, sans-serif"
             font-size="${fontSize}"
-            font-weight="bold"
+            font-weight="700"
             letter-spacing="1"
             fill="white"
             fill-opacity="${opacity}"
@@ -44,6 +69,16 @@ export class WatermarkService {
 
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <defs>
+          <style>
+            @font-face {
+              font-family: 'Inter';
+              font-style: normal;
+              font-weight: 700;
+              src: url('data:font/woff;base64,${this.fontBase64}') format('woff');
+            }
+          </style>
+        </defs>
         ${circleTexts.join('\n')}
       </svg>`;
 
@@ -62,4 +97,4 @@ export class WatermarkService {
       }])
       .toBuffer();
   }
-}
+}
